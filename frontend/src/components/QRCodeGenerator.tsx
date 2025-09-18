@@ -55,7 +55,11 @@ export function QRCodeGenerator({ merchantAddress }: QRCodeGeneratorProps) {
       }
     } catch (error) {
       console.error('Error fetching supported tokens:', error);
-      toast.error('Failed to load supported tokens');
+      
+      // Show error state when API is not available
+      setSupportedTokens({});
+      setPlatformFee({ percentage: 2.0, basisPoints: 200 });
+      toast.error('Failed to load supported tokens. Backend API not available.');
     } finally {
       setIsLoadingTokens(false);
     }
@@ -142,70 +146,75 @@ export function QRCodeGenerator({ merchantAddress }: QRCodeGeneratorProps) {
 
   if (isLoadingTokens) {
     return (
-      <div className="text-center py-12">
-        <div className="animate-spin inline-block h-8 w-8 border-4 border-orange-500 border-r-transparent rounded-full"></div>
-        <p className="text-slate-400 mt-4">Loading supported tokens...</p>
+      <div className="text-center py-16">
+        <div className="loading-spinner-lg mx-auto"></div>
+        <p className="text-[rgb(var(--color-text-secondary))] mt-6 font-medium">Loading supported tokens...</p>
+        <p className="text-[rgb(var(--color-text-muted))] text-sm mt-2">Please wait while we fetch the available payment options</p>
       </div>
     );
   }
 
   if (qrData) {
     return (
-      <div className="max-w-md mx-auto">
-        <div className="rounded-lg bg-slate-800 p-6 border border-slate-700 text-center">
-          <h3 className="text-xl font-semibold text-white mb-6">Payment QR Code</h3>
+      <div className="max-w-2xl mx-auto">
+        <div className="card p-8 sm:p-12 text-center animate-scaleIn">
+          <div className="flex items-center justify-center w-16 h-16 rounded-2xl gradient-secondary mx-auto mb-6 shadow-lg shadow-[rgb(var(--color-secondary))]/20">
+            <QrCode className="h-8 w-8 text-white" />
+          </div>
+          <h3 className="heading-3 mb-8 text-[rgb(var(--color-text-primary))]">Payment QR Code Generated</h3>
           
           {/* QR Code */}
-          <div className="bg-white p-4 rounded-lg mb-6 inline-block">
-            <QRCode value={qrData.paymentUrl} size={200} />
+          <div className="bg-white p-6 rounded-2xl mb-8 inline-block shadow-lg">
+            <QRCode value={qrData.paymentUrl} size={240} />
           </div>
 
           {/* Payment Details */}
-          <div className="space-y-3 mb-6 text-left">
-            <div className="flex justify-between">
-              <span className="text-slate-400">Amount:</span>
-              <span className="text-white font-medium">
+          <div className="space-y-4 mb-8 text-left bg-[rgb(var(--color-surface-elevated))] p-6 rounded-2xl">
+            <h4 className="heading-5 text-center mb-4 text-[rgb(var(--color-text-primary))]">Payment Details</h4>
+            <div className="flex justify-between py-2">
+              <span className="text-[rgb(var(--color-text-secondary))] font-medium">Amount:</span>
+              <span className="text-[rgb(var(--color-text-primary))] font-semibold">
                 {qrData.paymentData.amount} {supportedTokens[qrData.paymentData.tokenAddress]?.symbol}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">Description:</span>
-              <span className="text-white">{qrData.paymentData.description || 'Payment'}</span>
+            <div className="flex justify-between py-2">
+              <span className="text-[rgb(var(--color-text-secondary))] font-medium">Description:</span>
+              <span className="text-[rgb(var(--color-text-primary))]">{qrData.paymentData.description || 'Payment'}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">Payment ID:</span>
-              <span className="text-white font-mono text-sm">{qrData.paymentId}</span>
+            <div className="flex justify-between py-2">
+              <span className="text-[rgb(var(--color-text-secondary))] font-medium">Payment ID:</span>
+              <span className="text-[rgb(var(--color-text-primary))] font-mono text-sm">{qrData.paymentId}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">Expires:</span>
-              <span className="text-white">{new Date(qrData.expiresAt).toLocaleString()}</span>
+            <div className="flex justify-between py-2">
+              <span className="text-[rgb(var(--color-text-secondary))] font-medium">Expires:</span>
+              <span className="text-[rgb(var(--color-text-primary))]">{new Date(qrData.expiresAt).toLocaleString()}</span>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex space-x-3 mb-4">
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <button
               onClick={handleCopyPaymentUrl}
-              className="flex-1 flex items-center justify-center space-x-2 rounded-lg bg-slate-700 px-4 py-2 text-white hover:bg-slate-600 transition-colors"
+              className="btn-secondary flex-1 flex items-center justify-center space-x-3"
             >
-              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              {copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
               <span>{copied ? 'Copied!' : 'Copy URL'}</span>
             </button>
             <button
               onClick={handleDownloadQR}
-              className="flex-1 flex items-center justify-center space-x-2 rounded-lg bg-slate-700 px-4 py-2 text-white hover:bg-slate-600 transition-colors"
+              className="btn-secondary flex-1 flex items-center justify-center space-x-3"
             >
-              <Download className="h-4 w-4" />
-              <span>Download</span>
+              <Download className="h-5 w-5" />
+              <span>Download QR</span>
             </button>
           </div>
 
           <button
             onClick={handleNewPayment}
-            className="w-full flex items-center justify-center space-x-2 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 px-4 py-2 font-medium text-white hover:from-orange-600 hover:to-orange-700 transition-all"
+            className="btn-primary w-full flex items-center justify-center space-x-3"
           >
-            <RefreshCw className="h-4 w-4" />
-            <span>Generate New QR</span>
+            <RefreshCw className="h-5 w-5" />
+            <span>Generate New QR Code</span>
           </button>
         </div>
       </div>
@@ -213,28 +222,30 @@ export function QRCodeGenerator({ merchantAddress }: QRCodeGeneratorProps) {
   }
 
   return (
-    <div className="max-w-md mx-auto">
-      <div className="rounded-lg bg-slate-800 p-6 border border-slate-700">
-        <div className="text-center mb-6">
-          <QrCode className="h-12 w-12 text-orange-500 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-white mb-2">
-            Generate Payment QR
+    <div className="max-w-2xl mx-auto">
+      <div className="card p-8 sm:p-12 animate-fadeIn">
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center w-16 h-16 rounded-2xl gradient-primary mx-auto mb-6 shadow-lg shadow-[rgb(var(--color-primary))]/20">
+            <QrCode className="h-8 w-8 text-white" />
+          </div>
+          <h3 className="heading-3 mb-4 text-[rgb(var(--color-text-primary))]">
+            Generate Payment QR Code
           </h3>
-          <p className="text-slate-400 text-sm">
-            Create a QR code for customers to scan and pay
+          <p className="body-large text-[rgb(var(--color-text-secondary))] max-w-md mx-auto">
+            Create a secure QR code for customers to scan and pay instantly
           </p>
         </div>
 
-        <form onSubmit={handleSubmit(handleGenerateQR)} className="space-y-4">
+        <form onSubmit={handleSubmit(handleGenerateQR)} className="mobile-form-spacing">
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-semibold text-[rgb(var(--color-text-primary))] mb-3">
               Token *
             </label>
             <select
               {...register('tokenAddress', { required: 'Please select a token' })}
-              className="w-full rounded-lg bg-slate-700 border border-slate-600 px-3 py-2 text-white focus:border-orange-500 focus:outline-none"
+              className={`input-primary ${errors.tokenAddress ? 'error-border' : ''}`}
             >
-              <option value="">Select token</option>
+              <option value="">Select payment token</option>
               {Object.entries(supportedTokens).map(([address, token]) => (
                 <option key={address} value={address}>
                   {token.symbol} - {token.name}
@@ -242,12 +253,12 @@ export function QRCodeGenerator({ merchantAddress }: QRCodeGeneratorProps) {
               ))}
             </select>
             {errors.tokenAddress && (
-              <p className="text-red-400 text-sm mt-1">{errors.tokenAddress.message}</p>
+              <p className="error-state text-sm mt-2">{errors.tokenAddress.message}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-semibold text-[rgb(var(--color-text-primary))] mb-3">
               Amount *
             </label>
             <input
@@ -261,41 +272,48 @@ export function QRCodeGenerator({ merchantAddress }: QRCodeGeneratorProps) {
               })}
               type="number"
               step="0.000001"
-              className="w-full rounded-lg bg-slate-700 border border-slate-600 px-3 py-2 text-white placeholder-slate-400 focus:border-orange-500 focus:outline-none"
+              className={`input-primary ${errors.amount ? 'error-border' : ''}`}
               placeholder="0.00"
             />
             {errors.amount && (
-              <p className="text-red-400 text-sm mt-1">{errors.amount.message}</p>
+              <p className="error-state text-sm mt-2">{errors.amount.message}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-semibold text-[rgb(var(--color-text-primary))] mb-3">
               Description
             </label>
             <input
               {...register('description')}
               type="text"
-              className="w-full rounded-lg bg-slate-700 border border-slate-600 px-3 py-2 text-white placeholder-slate-400 focus:border-orange-500 focus:outline-none"
+              className="input-primary"
               placeholder="Payment description (optional)"
             />
           </div>
 
           {/* Payment Calculation */}
           {calculation && (
-            <div className="rounded-lg bg-slate-700 p-4 space-y-2">
-              <h4 className="text-sm font-medium text-slate-300 mb-2">Payment Breakdown</h4>
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-400">Customer pays:</span>
-                <span className="text-white">{calculation.grossAmount.toFixed(6)}</span>
+            <div className="card-elevated p-6 space-y-4 animate-slideInUp">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[rgb(var(--color-accent))]/10">
+                  <BarChart3 className="h-5 w-5 text-[rgb(var(--color-accent))]" />
+                </div>
+                <h4 className="heading-5 text-[rgb(var(--color-text-primary))]">Payment Breakdown</h4>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-400">Platform fee ({platformFee.percentage}%):</span>
-                <span className="text-orange-400">-{calculation.feeAmount.toFixed(6)}</span>
-              </div>
-              <div className="flex justify-between text-sm font-medium border-t border-slate-600 pt-2">
-                <span className="text-slate-300">You receive:</span>
-                <span className="text-green-400">{calculation.netAmount.toFixed(6)}</span>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center p-3 rounded-xl bg-[rgb(var(--color-surface))]">
+                  <span className="text-[rgb(var(--color-text-secondary))] font-medium">Customer pays:</span>
+                  <span className="text-[rgb(var(--color-text-primary))] font-semibold">{calculation.grossAmount.toFixed(6)}</span>
+                </div>
+                <div className="flex justify-between items-center p-3 rounded-xl bg-[rgb(var(--color-surface))]">
+                  <span className="text-[rgb(var(--color-text-secondary))] font-medium">Platform fee ({platformFee.percentage}%):</span>
+                  <span className="text-[rgb(var(--color-warning))] font-semibold">-{calculation.feeAmount.toFixed(6)}</span>
+                </div>
+                <div className="flex justify-between items-center p-3 rounded-xl bg-[rgb(var(--color-success-light))] border border-[rgb(var(--color-success))]/20">
+                  <span className="text-[rgb(var(--color-text-primary))] font-semibold">You receive:</span>
+                  <span className="text-[rgb(var(--color-success))] font-bold text-lg">{calculation.netAmount.toFixed(6)}</span>
+                </div>
               </div>
             </div>
           )}
@@ -303,12 +321,12 @@ export function QRCodeGenerator({ merchantAddress }: QRCodeGeneratorProps) {
           <button
             type="submit"
             disabled={isGenerating}
-            className="w-full rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 px-4 py-3 font-medium text-white hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="btn-primary w-full mobile-button"
           >
             {isGenerating ? (
-              <div className="flex items-center justify-center space-x-2">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-r-transparent"></div>
-                <span>Generating QR...</span>
+              <div className="flex items-center justify-center space-x-3">
+                <div className="loading-spinner"></div>
+                <span>Generating QR Code...</span>
               </div>
             ) : (
               'Generate QR Code'

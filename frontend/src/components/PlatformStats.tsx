@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { TrendingUp, Users, DollarSign, CreditCard, Zap } from 'lucide-react';
+import { TrendingUp, Users, DollarSign, CreditCard, Zap, BarChart3 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export function PlatformStats() {
@@ -31,22 +31,14 @@ export function PlatformStats() {
         setHealthStatus(healthResponse.data.health);
       }
     } catch (error) {
-      console.warn('API not available, using demo data:', error);
+      console.error('Failed to load platform data:', error);
       
-      // Use demo data when API is not available
-      setStats({
-        totalRevenue: 125432.50,
-        totalFees: 2508.65,
-        totalTransactions: 1247,
-        totalMerchants: 89,
-        averageTransaction: 100.58,
-        platformFee: 2.0
-      });
-      
+      // Show error state instead of demo data
+      setStats(null);
       setHealthStatus({
-        status: 'demo',
-        uptime: 86400,
-        version: 'v1.0.0-demo'
+        status: 'error',
+        uptime: 0,
+        version: 'v1.0.0'
       });
     } finally {
       setIsLoading(false);
@@ -55,10 +47,10 @@ export function PlatformStats() {
 
   if (isLoading) {
     return (
-      <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-        <div className="text-center py-8">
-          <div className="animate-spin inline-block h-8 w-8 border-4 border-orange-500 border-r-transparent rounded-full"></div>
-          <p className="text-slate-400 mt-4">Loading platform stats...</p>
+      <div className="card p-8">
+        <div className="text-center py-12">
+          <div className="loading-spinner-lg mx-auto"></div>
+          <p className="text-[rgb(var(--color-text-secondary))] mt-6 font-medium">Loading platform stats...</p>
         </div>
       </div>
     );
@@ -69,116 +61,124 @@ export function PlatformStats() {
       title: 'Total Revenue',
       value: stats ? `$${stats.totalRevenue.toFixed(2)}` : '$0.00',
       icon: DollarSign,
-      color: 'text-green-400',
-      bgColor: 'bg-green-900/20',
+      color: 'text-[rgb(var(--color-success))]',
+      bgColor: 'bg-[rgb(var(--color-success))]/10',
     },
     {
       title: 'Platform Fees',
       value: stats ? `$${stats.totalFees.toFixed(2)}` : '$0.00',
       icon: TrendingUp,
-      color: 'text-orange-400',
-      bgColor: 'bg-orange-900/20',
+      color: 'text-[rgb(var(--color-primary))]',
+      bgColor: 'bg-[rgb(var(--color-primary))]/10',
     },
     {
       title: 'Transactions',
       value: stats ? stats.totalTransactions.toString() : '0',
       icon: CreditCard,
-      color: 'text-blue-400',
-      bgColor: 'bg-blue-900/20',
+      color: 'text-[rgb(var(--color-secondary))]',
+      bgColor: 'bg-[rgb(var(--color-secondary))]/10',
     },
     {
       title: 'Merchants',
       value: stats ? stats.totalMerchants.toString() : '0',
       icon: Users,
-      color: 'text-purple-400',
-      bgColor: 'bg-purple-900/20',
+      color: 'text-[rgb(var(--color-accent))]',
+      bgColor: 'bg-[rgb(var(--color-accent))]/10',
     },
   ];
 
-  const mockChartData = [
-    { name: 'Mon', transactions: 12, volume: 2400 },
-    { name: 'Tue', transactions: 19, volume: 1398 },
-    { name: 'Wed', transactions: 8, volume: 9800 },
-    { name: 'Thu', transactions: 27, volume: 3908 },
-    { name: 'Fri', transactions: 15, volume: 4800 },
-    { name: 'Sat', transactions: 22, volume: 3800 },
-    { name: 'Sun', transactions: 10, volume: 4300 },
+  // Empty chart data when no real data is available
+  const emptyChartData = [
+    { name: 'Mon', transactions: 0, volume: 0 },
+    { name: 'Tue', transactions: 0, volume: 0 },
+    { name: 'Wed', transactions: 0, volume: 0 },
+    { name: 'Thu', transactions: 0, volume: 0 },
+    { name: 'Fri', transactions: 0, volume: 0 },
+    { name: 'Sat', transactions: 0, volume: 0 },
+    { name: 'Sun', transactions: 0, volume: 0 },
   ];
 
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-white">Platform Overview</h3>
+    <div className="card p-8 animate-fadeIn">
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center space-x-3">
+          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-[rgb(var(--color-primary))]/10">
+            <BarChart className="h-6 w-6 text-[rgb(var(--color-primary))]" />
+          </div>
+          <h3 className="heading-4 text-[rgb(var(--color-text-primary))]">Platform Overview</h3>
+        </div>
         {healthStatus && (
-          <div className="flex items-center space-x-2">
-            <div className={`h-2 w-2 rounded-full ${
-              healthStatus.status === 'healthy' ? 'bg-green-500' : 
-              healthStatus.status === 'demo' ? 'bg-yellow-500' : 'bg-red-500'
+          <div className="flex items-center space-x-3">
+            <div className={`h-3 w-3 rounded-full ${
+              healthStatus.status === 'healthy' ? 'bg-[rgb(var(--color-success))]' : 'bg-[rgb(var(--color-error))]'
             }`}></div>
-            <span className="text-sm text-slate-400 capitalize">
-              {healthStatus.status === 'demo' ? 'Demo Mode' : healthStatus.status}
+            <span className="text-sm text-[rgb(var(--color-text-secondary))] font-medium capitalize">
+              {healthStatus.status === 'error' ? 'Offline' : healthStatus.status}
             </span>
           </div>
         )}
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {statCards.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <div key={index} className="bg-slate-700/50 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <div className={`p-2 rounded-lg ${stat.bgColor}`}>
-                  <Icon className={`h-4 w-4 ${stat.color}`} />
+            <div key={index} className="bg-[rgb(var(--color-surface-elevated))] rounded-2xl p-6 transform hover:scale-105 transition-all duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <div className={`p-3 rounded-xl ${stat.bgColor}`}>
+                  <Icon className={`h-6 w-6 ${stat.color}`} />
                 </div>
               </div>
-              <div className="text-lg font-bold text-white">{stat.value}</div>
-              <div className="text-sm text-slate-400">{stat.title}</div>
+              <div className="text-2xl font-bold text-[rgb(var(--color-text-primary))] mb-1">{stat.value}</div>
+              <div className="text-sm text-[rgb(var(--color-text-secondary))] font-medium">{stat.title}</div>
             </div>
           );
         })}
       </div>
 
       {/* Chart */}
-      <div className="mb-6">
-        <h4 className="text-sm font-medium text-slate-300 mb-3">Weekly Activity</h4>
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={mockChartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis dataKey="name" stroke="#9CA3AF" fontSize={12} />
-            <YAxis stroke="#9CA3AF" fontSize={12} />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: '#1f2937', 
-                border: '1px solid #374151',
-                borderRadius: '8px',
-                color: '#fff'
-              }}
-            />
-            <Bar dataKey="transactions" fill="#f97316" radius={[2, 2, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+      <div className="mb-8">
+        <h4 className="heading-5 text-[rgb(var(--color-text-primary))] mb-4">Weekly Activity</h4>
+        <div className="bg-[rgb(var(--color-surface-elevated))] rounded-2xl p-6">
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={emptyChartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--color-border))" />
+              <XAxis dataKey="name" stroke="rgb(var(--color-text-muted))" fontSize={12} />
+              <YAxis stroke="rgb(var(--color-text-muted))" fontSize={12} />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'rgb(var(--color-surface))', 
+                  border: '1px solid rgb(var(--color-border))',
+                  borderRadius: '12px',
+                  color: 'rgb(var(--color-text-primary))',
+                  boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
+                }}
+              />
+              <Bar dataKey="transactions" fill="rgb(var(--color-primary))" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
       {/* Additional Stats */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-slate-700/50 rounded-lg p-4">
-          <div className="flex items-center space-x-2 mb-1">
-            <Zap className="h-4 w-4 text-yellow-400" />
-            <span className="text-sm text-slate-300">Avg Transaction</span>
+      <div className="grid grid-cols-2 gap-6 mb-8">
+        <div className="bg-[rgb(var(--color-surface-elevated))] rounded-2xl p-6">
+          <div className="flex items-center space-x-3 mb-3">
+            <Zap className="h-5 w-5 text-[rgb(var(--color-warning))]" />
+            <span className="text-sm text-[rgb(var(--color-text-secondary))] font-medium">Avg Transaction</span>
           </div>
-          <div className="text-lg font-bold text-white">
+          <div className="text-xl font-bold text-[rgb(var(--color-text-primary))]">
             ${stats ? stats.averageTransaction.toFixed(2) : '0.00'}
           </div>
         </div>
         
-        <div className="bg-slate-700/50 rounded-lg p-4">
-          <div className="flex items-center space-x-2 mb-1">
-            <TrendingUp className="h-4 w-4 text-green-400" />
-            <span className="text-sm text-slate-300">Platform Fee</span>
+        <div className="bg-[rgb(var(--color-surface-elevated))] rounded-2xl p-6">
+          <div className="flex items-center space-x-3 mb-3">
+            <TrendingUp className="h-5 w-5 text-[rgb(var(--color-success))]" />
+            <span className="text-sm text-[rgb(var(--color-text-secondary))] font-medium">Platform Fee</span>
           </div>
-          <div className="text-lg font-bold text-white">
+          <div className="text-xl font-bold text-[rgb(var(--color-text-primary))]">
             {stats ? stats.platformFee.toFixed(1) : '2.0'}%
           </div>
         </div>
@@ -186,8 +186,8 @@ export function PlatformStats() {
 
       {/* System Info */}
       {healthStatus && (
-        <div className="mt-6 pt-4 border-t border-slate-700">
-          <div className="text-xs text-slate-500 space-y-1">
+        <div className="pt-6 border-t border-[rgb(var(--color-border))]">
+          <div className="text-sm text-[rgb(var(--color-text-muted))] space-y-2">
             <div>Uptime: {Math.floor((healthStatus.uptime || 0) / 3600)}h</div>
             <div>Version: {healthStatus.version || 'v1.0.0'}</div>
           </div>

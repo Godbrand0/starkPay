@@ -38,7 +38,11 @@ export function TransactionHistory({ merchantAddress }: TransactionHistoryProps)
       }
     } catch (error) {
       console.error('Error fetching transactions:', error);
-      toast.error('Failed to load transactions');
+      
+      // Show error state when API is not available
+      setTransactions([]);
+      setPagination(null);
+      toast.error('Failed to load transactions. Backend API not available.');
     } finally {
       setIsLoading(false);
     }

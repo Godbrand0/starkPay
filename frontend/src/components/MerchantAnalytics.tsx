@@ -29,7 +29,10 @@ export function MerchantAnalytics({ merchantAddress }: MerchantAnalyticsProps) {
       }
     } catch (error) {
       console.error('Error fetching analytics:', error);
-      toast.error('Failed to load analytics');
+      
+      // Show error state when API is not available
+      setAnalytics(null);
+      toast.error('Failed to load analytics. Backend API not available.');
     } finally {
       setIsLoading(false);
     }

@@ -73,7 +73,7 @@ export function PaymentScanner({ walletAddress }: PaymentScannerProps) {
     try {
       // In a real implementation, you would use a QR code scanning library
       // For now, we'll show an error message
-      toast.error('QR code scanning from image is not implemented in this demo');
+      toast.error('QR code scanning from image is not yet implemented');
     } catch (error) {
       console.error('Error scanning QR code:', error);
       toast.error('Failed to scan QR code');
@@ -243,27 +243,30 @@ export function PaymentScanner({ walletAddress }: PaymentScannerProps) {
 
   if (paymentStatus !== 'idle') {
     return (
-      <div className="max-w-md mx-auto">
-        <div className="rounded-lg bg-slate-800 p-8 border border-slate-700 text-center">
-          {getStatusIcon()}
-          <h3 className="text-xl font-semibold text-white mt-4 mb-2">
+      <div className="max-w-2xl mx-auto">
+        <div className="card p-8 sm:p-12 text-center animate-scaleIn">
+          <div className="mb-6">
+            {getStatusIcon()}
+          </div>
+          <h3 className="heading-3 mb-4 text-[rgb(var(--color-text-primary))]">
             {getStatusMessage()}
           </h3>
           
           {transactionHash && (
-            <div className="mt-4 p-4 bg-slate-700 rounded-lg">
-              <p className="text-sm text-slate-400 mb-2">Transaction Hash:</p>
-              <div className="flex items-center justify-between">
-                <code className="text-xs text-white font-mono">
-                  {`${transactionHash.slice(0, 10)}...${transactionHash.slice(-8)}`}
+            <div className="mt-6 p-6 bg-[rgb(var(--color-surface-elevated))] rounded-2xl">
+              <p className="text-sm font-semibold text-[rgb(var(--color-text-secondary))] mb-3">Transaction Hash:</p>
+              <div className="flex items-center justify-between p-4 bg-[rgb(var(--color-surface))] rounded-xl">
+                <code className="text-sm text-[rgb(var(--color-text-primary))] font-mono">
+                  {`${transactionHash.slice(0, 12)}...${transactionHash.slice(-10)}`}
                 </code>
                 <a
                   href={`https://sepolia.starkscan.co/tx/${transactionHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-orange-500 hover:text-orange-400"
+                  className="p-2 rounded-lg text-[rgb(var(--color-primary))] hover:text-[rgb(var(--color-primary-hover))] hover:bg-[rgb(var(--color-primary))]/10 transition-all duration-200"
+                  aria-label="View transaction on explorer"
                 >
-                  <ExternalLink className="h-4 w-4" />
+                  <ExternalLink className="h-5 w-5" />
                 </a>
               </div>
             </div>
@@ -272,7 +275,7 @@ export function PaymentScanner({ walletAddress }: PaymentScannerProps) {
           {paymentStatus === 'success' || paymentStatus === 'error' ? (
             <button
               onClick={handleNewPayment}
-              className="mt-6 w-full rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 px-4 py-2 font-medium text-white hover:from-orange-600 hover:to-orange-700 transition-all"
+              className="mt-8 btn-primary w-full mobile-button"
             >
               Make Another Payment
             </button>
@@ -284,71 +287,79 @@ export function PaymentScanner({ walletAddress }: PaymentScannerProps) {
 
   if (paymentDetails) {
     return (
-      <div className="max-w-md mx-auto">
-        <div className="rounded-lg bg-slate-800 p-6 border border-slate-700">
-          <h3 className="text-xl font-semibold text-white mb-6 text-center">
-            Payment Details
-          </h3>
+      <div className="max-w-2xl mx-auto">
+        <div className="card p-8 sm:p-12 animate-fadeIn">
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center w-16 h-16 rounded-2xl gradient-secondary mx-auto mb-6 shadow-lg shadow-[rgb(var(--color-secondary))]/20">
+              <CreditCard className="h-8 w-8 text-white" />
+            </div>
+            <h3 className="heading-3 mb-4 text-[rgb(var(--color-text-primary))]">
+              Payment Details
+            </h3>
+            <p className="body-base text-[rgb(var(--color-text-secondary))]">
+              Review the payment details before confirming
+            </p>
+          </div>
           
-          <div className="space-y-4 mb-6">
-            <div className="flex justify-between">
-              <span className="text-slate-400">Merchant:</span>
-              <span className="text-white font-medium">{paymentDetails.merchantName}</span>
+          <div className="space-y-4 mb-8 bg-[rgb(var(--color-surface-elevated))] p-6 rounded-2xl">
+            <div className="flex justify-between items-center py-3">
+              <span className="text-[rgb(var(--color-text-secondary))] font-medium">Merchant:</span>
+              <span className="text-[rgb(var(--color-text-primary))] font-semibold">{paymentDetails.merchantName}</span>
             </div>
             
             {paymentDetails.merchantDescription && (
-              <div className="flex justify-between">
-                <span className="text-slate-400">Description:</span>
-                <span className="text-white">{paymentDetails.merchantDescription}</span>
+              <div className="flex justify-between items-center py-3">
+                <span className="text-[rgb(var(--color-text-secondary))] font-medium">Description:</span>
+                <span className="text-[rgb(var(--color-text-primary))]">{paymentDetails.merchantDescription}</span>
               </div>
             )}
             
-            <div className="flex justify-between">
-              <span className="text-slate-400">Token:</span>
-              <span className="text-white">{paymentDetails.tokenSymbol}</span>
+            <div className="flex justify-between items-center py-3">
+              <span className="text-[rgb(var(--color-text-secondary))] font-medium">Token:</span>
+              <span className="text-[rgb(var(--color-text-primary))] font-semibold">{paymentDetails.tokenSymbol}</span>
             </div>
             
-            <div className="flex justify-between">
-              <span className="text-slate-400">Amount:</span>
-              <span className="text-white font-medium">
+            <div className="flex justify-between items-center py-3">
+              <span className="text-[rgb(var(--color-text-secondary))] font-medium">Amount:</span>
+              <span className="text-[rgb(var(--color-text-primary))] font-semibold text-lg">
                 {paymentDetails.grossAmount} {paymentDetails.tokenSymbol}
               </span>
             </div>
             
-            <div className="flex justify-between">
-              <span className="text-slate-400">Platform Fee:</span>
-              <span className="text-orange-400">
+            <div className="flex justify-between items-center py-3">
+              <span className="text-[rgb(var(--color-text-secondary))] font-medium">Platform Fee:</span>
+              <span className="text-[rgb(var(--color-warning))] font-semibold">
                 {paymentDetails.feeAmount} {paymentDetails.tokenSymbol} ({paymentDetails.platformFeePercentage}%)
               </span>
             </div>
             
-            <div className="flex justify-between font-medium border-t border-slate-600 pt-3">
-              <span className="text-slate-300">Merchant Receives:</span>
-              <span className="text-green-400">
+            <div className="flex justify-between items-center py-3 border-t border-[rgb(var(--color-border))] bg-[rgb(var(--color-success-light))] -mx-6 px-6 rounded-b-2xl">
+              <span className="text-[rgb(var(--color-text-primary))] font-semibold">Merchant Receives:</span>
+              <span className="text-[rgb(var(--color-success))] font-bold text-lg">
                 {paymentDetails.netAmount} {paymentDetails.tokenSymbol}
               </span>
             </div>
           </div>
           
-          <div className="flex space-x-3">
+          <div className="flex flex-col sm:flex-row gap-4">
             <button
               onClick={handleNewPayment}
-              className="flex-1 rounded-lg bg-slate-700 px-4 py-2 text-white hover:bg-slate-600 transition-colors"
+              className="btn-secondary flex-1"
             >
               Cancel
             </button>
             <button
               onClick={handlePayment}
               disabled={isPaying}
-              className="flex-1 rounded-lg bg-gradient-to-r from-green-500 to-green-600 px-4 py-2 font-medium text-white hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="btn-success flex-1"
             >
               {isPaying ? (
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-r-transparent"></div>
-                  <span>Paying...</span>
+                <div className="flex items-center justify-center space-x-3">
+                  <div className="loading-spinner"></div>
+                  <span>Processing Payment...</span>
                 </div>
               ) : (
-                'Pay Now'
+                'Confirm Payment'
               )}
             </button>
           </div>
@@ -358,28 +369,28 @@ export function PaymentScanner({ walletAddress }: PaymentScannerProps) {
   }
 
   return (
-    <div className="max-w-lg mx-auto">
-      <div className="card p-6 sm:p-8 mobile-card">
-        <div className="text-center mb-6 sm:mb-8">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center">
-            <QrCode className="h-8 w-8 text-white" />
+    <div className="max-w-2xl mx-auto">
+      <div className="card p-8 sm:p-12 mobile-card animate-fadeIn">
+        <div className="text-center mb-8 sm:mb-10">
+          <div className="flex items-center justify-center w-20 h-20 rounded-2xl gradient-primary mx-auto mb-6 shadow-lg shadow-[rgb(var(--color-primary))]/20">
+            <QrCode className="h-10 w-10 text-white" />
           </div>
-          <h3 className="heading-3 mb-2">
+          <h3 className="heading-2 mb-4 text-[rgb(var(--color-text-primary))]">
             Scan Payment QR Code
           </h3>
-          <p className="body-small text-muted">
-            Choose your preferred scanning method
+          <p className="body-large text-[rgb(var(--color-text-secondary))] max-w-md mx-auto">
+            Choose your preferred scanning method to complete the payment
           </p>
         </div>
         
         {/* Scan Mode Selector */}
-        <div className="flex rounded-xl bg-slate-700/50 p-1 mb-6 sm:mb-8">
+        <div className="flex rounded-2xl bg-[rgb(var(--color-surface-elevated))] p-2 mb-8 sm:mb-10 shadow-sm">
           <button
             onClick={() => setScanMode('url')}
-            className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 touch-target ${
+            className={`flex-1 rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-300 touch-target ${
               scanMode === 'url'
-                ? 'bg-orange-500 text-white shadow-md'
-                : 'text-slate-400 hover:text-white hover:bg-slate-600/50'
+                ? 'bg-[rgb(var(--color-primary))] text-white shadow-lg shadow-[rgb(var(--color-primary))]/20'
+                : 'text-[rgb(var(--color-text-tertiary))] hover:text-[rgb(var(--color-text-primary))] hover:bg-[rgb(var(--color-surface))]'
             }`}
             aria-pressed={scanMode === 'url'}
           >
@@ -387,10 +398,10 @@ export function PaymentScanner({ walletAddress }: PaymentScannerProps) {
           </button>
           <button
             onClick={() => setScanMode('upload')}
-            className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 touch-target ${
+            className={`flex-1 rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-300 touch-target ${
               scanMode === 'upload'
-                ? 'bg-orange-500 text-white shadow-md'
-                : 'text-slate-400 hover:text-white hover:bg-slate-600/50'
+                ? 'bg-[rgb(var(--color-primary))] text-white shadow-lg shadow-[rgb(var(--color-primary))]/20'
+                : 'text-[rgb(var(--color-text-tertiary))] hover:text-[rgb(var(--color-text-primary))] hover:bg-[rgb(var(--color-surface))]'
             }`}
             aria-pressed={scanMode === 'upload'}
           >
@@ -398,10 +409,10 @@ export function PaymentScanner({ walletAddress }: PaymentScannerProps) {
           </button>
           <button
             onClick={() => setScanMode('camera')}
-            className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 touch-target ${
+            className={`flex-1 rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-300 touch-target ${
               scanMode === 'camera'
-                ? 'bg-orange-500 text-white shadow-md'
-                : 'text-slate-400 hover:text-white hover:bg-slate-600/50'
+                ? 'bg-[rgb(var(--color-primary))] text-white shadow-lg shadow-[rgb(var(--color-primary))]/20'
+                : 'text-[rgb(var(--color-text-tertiary))] hover:text-[rgb(var(--color-text-primary))] hover:bg-[rgb(var(--color-surface))]'
             }`}
             aria-pressed={scanMode === 'camera'}
           >
@@ -411,9 +422,9 @@ export function PaymentScanner({ walletAddress }: PaymentScannerProps) {
         
         {/* URL Input */}
         {scanMode === 'url' && (
-          <div className="space-y-6 animate-fadeIn">
+          <div className="space-y-8 animate-fadeIn">
             <div>
-              <label htmlFor="payment-url" className="block text-sm font-medium text-slate-300 mb-3">
+              <label htmlFor="payment-url" className="block text-sm font-semibold text-[rgb(var(--color-text-primary))] mb-4">
                 Payment URL
               </label>
               <input
@@ -422,10 +433,10 @@ export function PaymentScanner({ walletAddress }: PaymentScannerProps) {
                 value={paymentUrl}
                 onChange={(e) => setPaymentUrl(e.target.value)}
                 placeholder="https://starkpay.app/pay/..."
-                className="input-primary h-12"
+                className="input-primary h-14 text-base"
                 aria-describedby="url-help"
               />
-              <p id="url-help" className="text-xs text-slate-500 mt-2">
+              <p id="url-help" className="text-sm text-[rgb(var(--color-text-muted))] mt-3 text-center">
                 Paste the payment URL you received from the merchant
               </p>
             </div>
@@ -436,9 +447,9 @@ export function PaymentScanner({ walletAddress }: PaymentScannerProps) {
               aria-describedby={isLoading ? "loading-status" : undefined}
             >
               {isLoading ? (
-                <div className="flex items-center justify-center space-x-2">
+                <div className="flex items-center justify-center space-x-3">
                   <div className="loading-spinner" aria-hidden="true"></div>
-                  <span id="loading-status">Loading<span className="loading-dots"></span></span>
+                  <span id="loading-status">Loading Payment Details<span className="loading-dots"></span></span>
                 </div>
               ) : (
                 'Load Payment Details'
@@ -452,7 +463,7 @@ export function PaymentScanner({ walletAddress }: PaymentScannerProps) {
           <div className="animate-fadeIn">
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-slate-600 rounded-xl p-8 sm:p-12 text-center cursor-pointer hover:border-orange-500 hover:bg-slate-700/30 transition-all duration-200 group focus-within:ring-2 focus-within:ring-orange-500/50"
+              className="border-2 border-dashed border-[rgb(var(--color-border))] rounded-2xl p-12 sm:p-16 text-center cursor-pointer hover:border-[rgb(var(--color-primary))] hover:bg-[rgb(var(--color-primary))]/5 transition-all duration-300 group focus-within:ring-2 focus-within:ring-[rgb(var(--color-primary))]/50"
               role="button"
               tabIndex={0}
               onKeyDown={(e) => {
@@ -463,13 +474,13 @@ export function PaymentScanner({ walletAddress }: PaymentScannerProps) {
               }}
               aria-label="Upload QR code image"
             >
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-700 group-hover:bg-orange-500/20 transition-colors duration-200 flex items-center justify-center">
-                <Upload className="h-8 w-8 text-slate-400 group-hover:text-orange-500 transition-colors duration-200" />
+              <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-[rgb(var(--color-surface-elevated))] group-hover:bg-[rgb(var(--color-primary))]/10 transition-all duration-300 flex items-center justify-center">
+                <Upload className="h-10 w-10 text-[rgb(var(--color-text-tertiary))] group-hover:text-[rgb(var(--color-primary))] transition-colors duration-300" />
               </div>
-              <p className="body-base text-slate-300 mb-2">Click to upload QR code image</p>
-              <p className="body-small text-slate-500">PNG, JPG, GIF up to 10MB</p>
-              <div className="mt-4 text-xs text-slate-600">
-                <strong>Note:</strong> QR scanning is demo only
+              <p className="body-large text-[rgb(var(--color-text-primary))] mb-3 font-semibold">Click to upload QR code image</p>
+              <p className="body-base text-[rgb(var(--color-text-secondary))] mb-4">PNG, JPG, GIF up to 10MB</p>
+              <div className="status-info inline-block">
+                <strong>Coming Soon:</strong> QR scanning from images
               </div>
             </div>
             <input
@@ -485,12 +496,15 @@ export function PaymentScanner({ walletAddress }: PaymentScannerProps) {
         
         {/* Camera Scanner */}
         {scanMode === 'camera' && (
-          <div className="text-center py-8">
-            <Camera className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-            <p className="text-slate-400 mb-4">Camera scanning is not available in this demo</p>
-            <p className="text-slate-500 text-sm">
-              In a production app, this would open your device's camera to scan QR codes
-            </p>
+          <div className="text-center py-16 animate-fadeIn">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-[rgb(var(--color-surface-elevated))] flex items-center justify-center">
+              <Camera className="h-10 w-10 text-[rgb(var(--color-text-tertiary))]" />
+            </div>
+            <h4 className="heading-4 text-[rgb(var(--color-text-primary))] mb-4">Camera Scanner</h4>
+            <p className="body-base text-[rgb(var(--color-text-secondary))] mb-4">Camera scanning is not yet available</p>
+            <div className="status-info inline-block">
+              <strong>Coming Soon:</strong> Real-time camera QR scanning
+            </div>
           </div>
         )}
       </div>

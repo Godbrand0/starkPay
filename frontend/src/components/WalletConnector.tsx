@@ -78,32 +78,32 @@ export function WalletConnector() {
 
   if (walletState.isConnected && walletState.address) {
     return (
-      <div className="flex items-center space-x-2 sm:space-x-4">
+      <div className="flex items-center space-x-3 sm:space-x-4">
         {/* Network Badge */}
-        <div className="hidden md:flex items-center space-x-2 rounded-lg bg-slate-800 px-3 py-2 border border-slate-700">
+        <div className="hidden md:flex items-center space-x-3 rounded-xl bg-[rgb(var(--color-surface-elevated))] px-4 py-2.5 border border-[rgb(var(--color-border))] shadow-sm">
           <div 
-            className={`h-2 w-2 rounded-full ${getNetworkColor()}`}
+            className={`h-2.5 w-2.5 rounded-full ${getNetworkColor()}`}
             aria-label={`Connected to ${getNetworkName()}`}
           ></div>
-          <span className="text-sm text-slate-300">{getNetworkName()}</span>
+          <span className="text-sm font-medium text-[rgb(var(--color-text-primary))]">{getNetworkName()}</span>
         </div>
 
         {/* Address Display */}
-        <div className="flex items-center space-x-2 rounded-lg bg-slate-800 px-3 py-2 border border-slate-700 touch-target">
-          <Wallet className="h-4 w-4 text-orange-500" aria-hidden="true" />
-          <span className="text-sm font-medium text-white">
+        <div className="flex items-center space-x-3 rounded-xl bg-[rgb(var(--color-surface-elevated))] px-4 py-2.5 border border-[rgb(var(--color-border))] touch-target shadow-sm">
+          <Wallet className="h-4 w-4 text-[rgb(var(--color-primary))]" aria-hidden="true" />
+          <span className="text-sm font-medium text-[rgb(var(--color-text-primary))]">
             {formatAddress(walletState.address)}
           </span>
           <button
             onClick={handleCopyAddress}
-            className="p-1 rounded hover:bg-slate-700 transition-colors interactive-focus touch-target"
+            className="p-1.5 rounded-lg hover:bg-[rgb(var(--color-surface))] transition-all duration-200 interactive-focus touch-target"
             aria-label={copied ? 'Address copied' : 'Copy wallet address'}
             title={copied ? 'Address copied!' : 'Copy address'}
           >
             {copied ? (
-              <Check className="h-3 w-3 text-green-500" aria-hidden="true" />
+              <Check className="h-3.5 w-3.5 text-[rgb(var(--color-success))]" aria-hidden="true" />
             ) : (
-              <Copy className="h-3 w-3 text-slate-400" aria-hidden="true" />
+              <Copy className="h-3.5 w-3.5 text-[rgb(var(--color-text-tertiary))]" aria-hidden="true" />
             )}
           </button>
         </div>
@@ -111,12 +111,12 @@ export function WalletConnector() {
         {/* Disconnect Button */}
         <button
           onClick={handleDisconnect}
-          className="flex items-center space-x-1 sm:space-x-2 rounded-lg bg-red-900/20 px-2 sm:px-3 py-2 border border-red-500/20 hover:bg-red-900/30 transition-colors text-red-400 hover:text-red-300 interactive-focus touch-target"
+          className="flex items-center space-x-2 rounded-xl bg-[rgb(var(--color-error-light))] px-3 sm:px-4 py-2.5 border border-[rgb(var(--color-error))]/20 hover:bg-[rgb(var(--color-error))]/10 transition-all duration-200 text-[rgb(var(--color-error))] hover:text-red-600 interactive-focus touch-target shadow-sm"
           aria-label="Disconnect wallet"
           title="Disconnect wallet"
         >
           <LogOut className="h-4 w-4" aria-hidden="true" />
-          <span className="hidden sm:inline text-sm">Disconnect</span>
+          <span className="hidden sm:inline text-sm font-medium">Disconnect</span>
         </button>
       </div>
     );
@@ -126,7 +126,7 @@ export function WalletConnector() {
     <button
       onClick={handleConnect}
       disabled={walletState.isConnecting}
-      className="btn-primary mobile-button mobile-touch-target interactive-focus"
+      className="btn-primary mobile-button mobile-touch-target interactive-focus flex items-center space-x-2"
       aria-label={walletState.isConnecting ? 'Connecting to wallet...' : 'Connect your Starknet wallet'}
     >
       {walletState.isConnecting ? (
@@ -136,9 +136,9 @@ export function WalletConnector() {
         </>
       ) : (
         <>
-          <Wallet className="h-4 w-4" aria-hidden="true" />
-          <span className="hidden sm:inline">Connect Wallet</span>
-          <span className="sm:hidden">Connect</span>
+          <Wallet className="h-5 w-5" aria-hidden="true" />
+          <span className="hidden sm:inline font-medium">Connect Wallet</span>
+          <span className="sm:hidden font-medium">Connect</span>
         </>
       )}
     </button>

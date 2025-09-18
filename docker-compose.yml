@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: starkpay-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: starkpay
+    volumes:
+      - mongodb_data:/data/db
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - starkpay-network
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: starkpay-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    command: redis-server --appendonly yes --requirepass starkpay123
+    volumes:
+      - redis_data:/data
+    networks:
+      - starkpay-network
+
+volumes:
+  mongodb_data:
+  redis_data:
+
+networks:
+  starkpay-network:
+    driver: bridge

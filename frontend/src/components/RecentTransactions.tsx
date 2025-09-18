@@ -25,68 +25,14 @@ export function RecentTransactions() {
         setSummary(response.data.summary);
       }
     } catch (error) {
-      console.warn('API not available, using demo data:', error);
+      console.error('Failed to load recent transactions:', error);
       
-      // Use demo data when API is not available
-      const demoTransactions: Transaction[] = [
-        {
-          id: 'demo-1',
-          transactionHash: '0x1234567890abcdef1234567890abcdef12345678',
-          payerAddress: '0x0123456789abcdef0123456789abcdef01234567',
-          merchantAddress: '0xabcdef0123456789abcdef0123456789abcdef01',
-          tokenAddress: '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-          grossAmount: 125.50,
-          feeAmount: 2.51,
-          netAmount: 122.99,
-          formattedGrossAmount: '125.50 USDC',
-          formattedFeeAmount: '2.51 USDC',
-          formattedNetAmount: '122.99 USDC',
-          status: 'completed',
-          timestamp: new Date(Date.now() - 300000).toISOString(),
-          blockNumber: 123456,
-          paymentId: 'demo-payment-1'
-        },
-        {
-          id: 'demo-2',
-          transactionHash: '0xabcdef1234567890abcdef1234567890abcdef12',
-          payerAddress: '0x0987654321fedcba0987654321fedcba09876543',
-          merchantAddress: '0xfedcba0987654321fedcba0987654321fedcba09',
-          tokenAddress: '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-          grossAmount: 75.25,
-          feeAmount: 1.51,
-          netAmount: 73.74,
-          formattedGrossAmount: '75.25 USDC',
-          formattedFeeAmount: '1.51 USDC',
-          formattedNetAmount: '73.74 USDC',
-          status: 'pending',
-          timestamp: new Date(Date.now() - 600000).toISOString(),
-          blockNumber: 123455,
-          paymentId: 'demo-payment-2'
-        },
-        {
-          id: 'demo-3',
-          transactionHash: '0x567890abcdef1234567890abcdef1234567890ab',
-          payerAddress: '0x5555666677778888999900001111222233334444',
-          merchantAddress: '0x4444333322221111000099998888777766665555',
-          tokenAddress: '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-          grossAmount: 200.00,
-          feeAmount: 4.00,
-          netAmount: 196.00,
-          formattedGrossAmount: '200.00 USDC',
-          formattedFeeAmount: '4.00 USDC',
-          formattedNetAmount: '196.00 USDC',
-          status: 'completed',
-          timestamp: new Date(Date.now() - 900000).toISOString(),
-          blockNumber: 123454,
-          paymentId: 'demo-payment-3'
-        }
-      ];
-      
-      setTransactions(demoTransactions);
+      // Show empty state when API is not available
+      setTransactions([]);
       setSummary({
-        total: 3,
-        completed: 2,
-        pending: 1
+        total: 0,
+        completed: 0,
+        pending: 0
       });
     } finally {
       setIsLoading(false);
@@ -137,7 +83,7 @@ export function RecentTransactions() {
         <div className="flex items-center space-x-2">
           <Clock className="h-4 w-4 text-slate-400" />
           <span className="text-sm text-slate-400">
-            {transactions.some(t => t.id.startsWith('demo-')) ? 'Demo Data' : 'Live'}
+            {transactions.length > 0 ? 'Live' : 'No Data'}
           </span>
         </div>
       </div>

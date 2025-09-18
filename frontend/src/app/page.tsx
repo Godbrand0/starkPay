@@ -62,45 +62,45 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen gradient-background">
       {/* Skip Link for accessibility */}
       <a 
         href="#main-content" 
-        className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 z-50 bg-orange-600 text-white px-4 py-2 rounded-br-lg font-medium"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 z-50 bg-[rgb(var(--color-primary))] text-white px-4 py-2 rounded-br-2xl font-medium shadow-lg"
       >
         Skip to main content
       </a>
       
       {/* Demo Mode Banner */}
       <div 
-        className="bg-yellow-900/20 border-b border-yellow-500/20 px-4 py-3" 
+        className="bg-[rgb(var(--color-warning-light))] border-b border-[rgb(var(--color-warning))]/20 px-4 py-3" 
         role="banner" 
         aria-label="Demo mode notification"
       >
-        <div className="container mx-auto">
-          <div className="flex items-center justify-center space-x-2 text-sm">
+        <div className="container-fluid">
+          <div className="flex items-center justify-center space-x-3 text-sm">
             <div 
-              className="h-2 w-2 rounded-full bg-yellow-500" 
+              className="h-2 w-2 rounded-full bg-[rgb(var(--color-warning))] animate-pulse" 
               aria-hidden="true"
             ></div>
-            <span className="text-yellow-200">
-              <strong>Demo Mode</strong> - Connect wallet to interact with Starknet contracts
+            <span className="text-[rgb(var(--color-warning))] font-medium">
+              <strong>Demo Mode</strong> - Connect your wallet to interact with Starknet contracts
             </span>
           </div>
         </div>
       </div>
 
       {/* Header */}
-      <header className="border-b border-slate-700/50 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-30">
-        <div className="container mx-auto px-4 py-4 sm:py-6">
+      <header className="border-b border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))]/95 backdrop-blur-lg sticky top-0 z-30 shadow-sm">
+        <div className="container-fluid py-4 sm:py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3 sm:space-x-4">
-              <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 touch-target">
-                <CreditCard className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+            <div className="flex items-center space-x-4 sm:space-x-6">
+              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl gradient-primary touch-target shadow-lg shadow-[rgb(var(--color-primary))]/20">
+                <CreditCard className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-white">StarkPay</h1>
-                <p className="text-xs sm:text-sm text-slate-400">QR Payments on Starknet</p>
+                <h1 className="text-xl sm:text-2xl font-bold text-[rgb(var(--color-text-primary))] tracking-tight">StarkPay</h1>
+                <p className="text-sm sm:text-base text-[rgb(var(--color-text-tertiary))] font-medium">Secure QR Payments on Starknet</p>
               </div>
             </div>
             <WalletConnector />
@@ -110,73 +110,80 @@ export default function HomePage() {
 
       {/* Hero Section */}
       {!walletState.isConnected && (
-        <section className="relative py-12 sm:py-16 lg:py-20">
-          <div className="container mx-auto px-4 text-center">
-            <div className="mx-auto max-w-4xl">
-              <h2 className="mb-6 sm:mb-8 heading-1">
-                Accept Crypto Payments
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600 mt-2">
-                  Instantly
-                </span>
-              </h2>
-              <p className="mb-8 sm:mb-10 body-large max-w-2xl mx-auto">
-                Generate QR codes, accept USDC/USDT payments, and track transactions
-                on Starknet with just 2% platform fee.
-              </p>
+        <section className="relative py-16 sm:py-20 lg:py-24">
+          <div className="container-fluid text-center">
+            <div className="mx-auto max-w-5xl">
+              <div className="animate-fadeIn">
+                <h2 className="mb-6 sm:mb-8 heading-1">
+                  Accept Crypto Payments
+                  <span className="block text-transparent bg-clip-text gradient-primary mt-3">
+                    Effortlessly
+                  </span>
+                </h2>
+                <p className="mb-10 sm:mb-12 body-large max-w-3xl mx-auto text-[rgb(var(--color-text-secondary))]">
+                  Generate secure QR codes, accept USDC/USDT payments, and track transactions
+                  on Starknet with transparent 2% platform fee. Built for businesses of all sizes.
+                </p>
+              </div>
               
               {/* Wallet Installation Instructions */}
-              <div className="mb-8 sm:mb-10 rounded-xl bg-slate-800/50 p-6 sm:p-8 border border-slate-700/50 mobile-card">
-                <h3 className="heading-4 mb-4">Get Started</h3>
-                <p className="body-base mb-6 max-w-lg mx-auto">
-                  To use StarkPay, you'll need a Starknet wallet. Install one of these wallets:
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 max-w-md mx-auto">
-                  <a
-                    href="https://chrome.google.com/webstore/detail/argent-x/dlcobpjiigpikoobohmabehhmhfoodbb"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-primary mobile-button mobile-touch-target interactive-focus"
-                    aria-label="Install ArgentX wallet extension"
-                  >
-                    Install ArgentX
-                  </a>
-                  <a
-                    href="https://chrome.google.com/webstore/detail/braavos-smart-wallet/jnlgamecbpmbajjfhmmmlhejkemejdma"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-secondary mobile-button mobile-touch-target interactive-focus"
-                    aria-label="Install Braavos wallet extension"
-                  >
-                    Install Braavos
-                  </a>
+              <div className="mb-12 sm:mb-16 animate-slideInUp">
+                <div className="card-hover p-8 sm:p-10 mobile-card max-w-2xl mx-auto">
+                  <div className="flex items-center justify-center w-16 h-16 rounded-2xl gradient-primary mx-auto mb-6 shadow-lg shadow-[rgb(var(--color-primary))]/20">
+                    <CreditCard className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="heading-3 mb-4 text-[rgb(var(--color-text-primary))]">Get Started</h3>
+                  <p className="body-base mb-8 max-w-lg mx-auto text-[rgb(var(--color-text-secondary))]">
+                    To use StarkPay, you'll need a Starknet wallet. Choose from these trusted options:
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 max-w-lg mx-auto">
+                    <a
+                      href="https://chrome.google.com/webstore/detail/argent-x/dlcobpjiigpikoobohmabehhmhfoodbb"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-primary mobile-button mobile-touch-target interactive-focus"
+                      aria-label="Install ArgentX wallet extension"
+                    >
+                      Install ArgentX
+                    </a>
+                    <a
+                      href="https://chrome.google.com/webstore/detail/braavos-smart-wallet/jnlgamecbpmbajjfhmmmlhejkemejdma"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-secondary mobile-button mobile-touch-target interactive-focus"
+                      aria-label="Install Braavos wallet extension"
+                    >
+                      Install Braavos
+                    </a>
+                  </div>
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mt-12 tablet-layout">
-                <div className="card-hover p-6 sm:p-8 mobile-card group">
-                  <div className="p-3 rounded-xl bg-orange-500/10 w-fit mb-4 group-hover:bg-orange-500/20 transition-colors">
-                    <Users className="h-8 w-8 text-orange-500" aria-hidden="true" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 animate-scaleIn">
+                <div className="card-hover p-8 sm:p-10 mobile-card group transform hover:scale-105 transition-all duration-300">
+                  <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-[rgb(var(--color-secondary))]/10 group-hover:bg-[rgb(var(--color-secondary))]/20 transition-all duration-300 mb-6">
+                    <Users className="h-7 w-7 text-[rgb(var(--color-secondary))]" aria-hidden="true" />
                   </div>
-                  <h3 className="heading-5 mb-3">For Merchants</h3>
-                  <p className="body-small">
-                    Generate payment QR codes and manage your transactions
+                  <h3 className="heading-4 mb-4 text-[rgb(var(--color-text-primary))]">For Merchants</h3>
+                  <p className="body-base text-[rgb(var(--color-text-secondary))]">
+                    Generate secure payment QR codes and manage your transactions with comprehensive analytics
                   </p>
                 </div>
-                <div className="card-hover p-6 sm:p-8 mobile-card group">
-                  <div className="p-3 rounded-xl bg-orange-500/10 w-fit mb-4 group-hover:bg-orange-500/20 transition-colors">
-                    <QrCode className="h-8 w-8 text-orange-500" aria-hidden="true" />
+                <div className="card-hover p-8 sm:p-10 mobile-card group transform hover:scale-105 transition-all duration-300">
+                  <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-[rgb(var(--color-primary))]/10 group-hover:bg-[rgb(var(--color-primary))]/20 transition-all duration-300 mb-6">
+                    <QrCode className="h-7 w-7 text-[rgb(var(--color-primary))]" aria-hidden="true" />
                   </div>
-                  <h3 className="heading-5 mb-3">Easy Payments</h3>
-                  <p className="body-small">
-                    Scan QR codes to pay with USDC or USDT tokens
+                  <h3 className="heading-4 mb-4 text-[rgb(var(--color-text-primary))]">Easy Payments</h3>
+                  <p className="body-base text-[rgb(var(--color-text-secondary))]">
+                    Scan QR codes to pay instantly with USDC or USDT tokens on Starknet
                   </p>
                 </div>
-                <div className="card-hover p-6 sm:p-8 mobile-card group sm:col-span-2 lg:col-span-1">
-                  <div className="p-3 rounded-xl bg-orange-500/10 w-fit mb-4 group-hover:bg-orange-500/20 transition-colors">
-                    <TrendingUp className="h-8 w-8 text-orange-500" aria-hidden="true" />
+                <div className="card-hover p-8 sm:p-10 mobile-card group transform hover:scale-105 transition-all duration-300 sm:col-span-2 lg:col-span-1">
+                  <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-[rgb(var(--color-accent))]/10 group-hover:bg-[rgb(var(--color-accent))]/20 transition-all duration-300 mb-6">
+                    <TrendingUp className="h-7 w-7 text-[rgb(var(--color-accent))]" aria-hidden="true" />
                   </div>
-                  <h3 className="heading-5 mb-3">Real-time Analytics</h3>
-                  <p className="body-small">
-                    Track your earnings and transaction history
+                  <h3 className="heading-4 mb-4 text-[rgb(var(--color-text-primary))]">Real-time Analytics</h3>
+                  <p className="body-base text-[rgb(var(--color-text-secondary))]">
+                    Track your earnings and transaction history with detailed insights
                   </p>
                 </div>
               </div>
@@ -189,9 +196,9 @@ export default function HomePage() {
       {walletState.isConnected && (
         <>
           {/* Navigation Tabs */}
-          <div className="border-b border-slate-700/50 bg-slate-900/30 backdrop-blur-sm sticky top-[73px] sm:top-[81px] z-20">
-            <div className="container mx-auto px-4">
-              <nav className="flex space-x-4 sm:space-x-8 overflow-x-auto scrollbar-hide" role="tablist" aria-label="Main navigation">
+          <div className="border-b border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))]/95 backdrop-blur-lg sticky top-[73px] sm:top-[81px] z-20 shadow-sm">
+            <div className="container-fluid">
+              <nav className="flex space-x-2 sm:space-x-4 overflow-x-auto scrollbar-hide" role="tablist" aria-label="Main navigation">
                 {tabs.map((tab) => {
                   const Icon = tab.icon;
                   return (
@@ -201,14 +208,14 @@ export default function HomePage() {
                       role="tab"
                       aria-selected={activeTab === tab.id}
                       aria-controls={`tabpanel-${tab.id}`}
-                      className={`flex items-center space-x-2 border-b-2 px-2 sm:px-3 py-4 text-sm font-medium transition-colors whitespace-nowrap touch-target interactive-focus ${
+                      className={`flex items-center space-x-2 border-b-2 px-4 sm:px-6 py-4 text-sm font-medium transition-all duration-300 whitespace-nowrap touch-target interactive-focus rounded-t-xl ${
                         activeTab === tab.id
-                          ? 'border-orange-500 text-orange-500'
-                          : 'border-transparent text-slate-400 hover:text-slate-300'
+                          ? 'border-[rgb(var(--color-primary))] text-[rgb(var(--color-primary))] bg-[rgb(var(--color-primary))]/5'
+                          : 'border-transparent text-[rgb(var(--color-text-tertiary))] hover:text-[rgb(var(--color-text-primary))] hover:bg-[rgb(var(--color-surface-elevated))]'
                       }`}
                       title={tab.description}
                     >
-                      <Icon className="h-4 w-4" aria-hidden="true" />
+                      <Icon className="h-5 w-5" aria-hidden="true" />
                       <span className="hidden sm:inline">{tab.name}</span>
                       <span className="sm:hidden">{tab.name.slice(0, 3)}</span>
                     </button>
@@ -219,23 +226,23 @@ export default function HomePage() {
           </div>
 
           {/* Tab Content */}
-          <main id="main-content" className="container mx-auto px-4 py-8" role="main">
+          <main id="main-content" className="container-fluid py-8 sm:py-12" role="main">
             {activeTab === 'merchant' && (
-              <div id="tabpanel-merchant" role="tabpanel" aria-labelledby="tab-merchant" className="space-y-8">
-                <div className="text-center">
-                  <h2 className="heading-2 mb-2">Merchant Dashboard</h2>
-                  <p className="body-base text-muted">
-                    Manage your payments and generate QR codes for customers
+              <div id="tabpanel-merchant" role="tabpanel" aria-labelledby="tab-merchant" className="space-y-8 sm:space-y-12 animate-fadeIn">
+                <div className="text-center max-w-3xl mx-auto">
+                  <h2 className="heading-2 mb-4">Merchant Dashboard</h2>
+                  <p className="body-large text-[rgb(var(--color-text-secondary))]">
+                    Manage your payments and generate secure QR codes for customers
                   </p>
                 </div>
                 
                 {isCheckingRegistration ? (
-                  <div className="text-center py-12" role="status" aria-live="polite">
+                  <div className="text-center py-16" role="status" aria-live="polite">
                     <div className="loading-spinner-lg mx-auto" aria-hidden="true"></div>
-                    <p className="body-base text-muted mt-4">
+                    <p className="body-base text-[rgb(var(--color-text-secondary))] mt-6">
                       Checking merchant registration<span className="loading-dots"></span>
                     </p>
-                    <p className="body-small text-slate-500 mt-2">
+                    <p className="body-small text-[rgb(var(--color-text-muted))] mt-3">
                       Verifying with blockchain...
                     </p>
                   </div>
@@ -250,11 +257,11 @@ export default function HomePage() {
             )}
 
             {activeTab === 'payment' && (
-              <div id="tabpanel-payment" role="tabpanel" aria-labelledby="tab-payment" className="space-y-8">
-                <div className="text-center">
-                  <h2 className="heading-2 mb-2">Make Payment</h2>
-                  <p className="body-base text-muted">
-                    Scan a QR code to pay a merchant
+              <div id="tabpanel-payment" role="tabpanel" aria-labelledby="tab-payment" className="space-y-8 sm:space-y-12 animate-fadeIn">
+                <div className="text-center max-w-3xl mx-auto">
+                  <h2 className="heading-2 mb-4">Make Payment</h2>
+                  <p className="body-large text-[rgb(var(--color-text-secondary))]">
+                    Scan a QR code to pay a merchant securely
                   </p>
                 </div>
                 <PaymentScanner walletAddress={walletState.address!} />
@@ -262,14 +269,14 @@ export default function HomePage() {
             )}
 
             {activeTab === 'analytics' && (
-              <div id="tabpanel-analytics" role="tabpanel" aria-labelledby="tab-analytics" className="space-y-8">
-                <div className="text-center">
-                  <h2 className="heading-2 mb-2">Platform Analytics</h2>
-                  <p className="body-base text-muted">
+              <div id="tabpanel-analytics" role="tabpanel" aria-labelledby="tab-analytics" className="space-y-8 sm:space-y-12 animate-fadeIn">
+                <div className="text-center max-w-3xl mx-auto">
+                  <h2 className="heading-2 mb-4">Platform Analytics</h2>
+                  <p className="body-large text-[rgb(var(--color-text-secondary))]">
                     View transaction statistics and platform metrics
                   </p>
                 </div>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12">
                   <PlatformStats />
                   <RecentTransactions />
                 </div>
@@ -280,35 +287,39 @@ export default function HomePage() {
       )}
 
       {/* Footer */}
-      <footer className="border-t border-slate-700/50 bg-slate-900/50 backdrop-blur-sm mt-auto">
-        <div className="container mx-auto px-4 py-6 sm:py-8">
-          <div className="flex flex-col lg:flex-row items-center justify-between space-y-4 lg:space-y-0 gap-4">
-            <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 text-center sm:text-left">
-              <p className="body-small text-slate-400">
+      <footer className="border-t border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))]/95 backdrop-blur-lg mt-auto">
+        <div className="container-fluid py-8 sm:py-12">
+          <div className="flex flex-col lg:flex-row items-center justify-between space-y-6 lg:space-y-0 gap-6">
+            <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-6 text-center sm:text-left">
+              <p className="body-small text-[rgb(var(--color-text-tertiary))]">
                 © 2024 StarkPay. Built on Starknet.
               </p>
-              <div className="hidden sm:block h-4 w-px bg-slate-600"></div>
-              <span className="inline-flex items-center px-2 py-1 rounded-full bg-yellow-900/20 text-yellow-400 border border-yellow-500/20 text-xs">
+              <div className="hidden sm:block h-4 w-px bg-[rgb(var(--color-border))]"></div>
+              <span className="status-info">
                 Demo Version - For testing purposes only
               </span>
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-sm text-slate-400">
-              <span className="px-2 py-1 rounded bg-slate-800 border border-slate-700">
-                Platform Fee: 2%
-              </span>
-              <div className="hidden sm:block h-4 w-px bg-slate-600"></div>
-              <span className="px-2 py-1 rounded bg-slate-800 border border-slate-700">
-                Network: {process.env.NEXT_PUBLIC_NETWORK === 'mainnet' ? 'Mainnet' : 'Sepolia'}
-              </span>
-              <div className="hidden sm:block h-4 w-px bg-slate-600"></div>
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm">
+              <div className="flex items-center space-x-2 px-3 py-2 rounded-xl bg-[rgb(var(--color-surface-elevated))] border border-[rgb(var(--color-border))]">
+                <span className="text-[rgb(var(--color-text-tertiary))]">Platform Fee:</span>
+                <span className="font-medium text-[rgb(var(--color-text-primary))]">2%</span>
+              </div>
+              <div className="hidden sm:block h-4 w-px bg-[rgb(var(--color-border))]"></div>
+              <div className="flex items-center space-x-2 px-3 py-2 rounded-xl bg-[rgb(var(--color-surface-elevated))] border border-[rgb(var(--color-border))]">
+                <span className="text-[rgb(var(--color-text-tertiary))]">Network:</span>
+                <span className="font-medium text-[rgb(var(--color-text-primary))]">
+                  {process.env.NEXT_PUBLIC_NETWORK === 'mainnet' ? 'Mainnet' : 'Sepolia'}
+                </span>
+              </div>
+              <div className="hidden sm:block h-4 w-px bg-[rgb(var(--color-border))]"></div>
               <a
                 href="https://starkscan.co"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-2 py-1 rounded bg-slate-800 border border-slate-700 hover:text-orange-400 hover:border-orange-500/30 transition-all interactive-focus"
+                className="flex items-center space-x-2 px-3 py-2 rounded-xl bg-[rgb(var(--color-surface-elevated))] border border-[rgb(var(--color-border))] hover:bg-[rgb(var(--color-primary))]/5 hover:border-[rgb(var(--color-primary))]/30 hover:text-[rgb(var(--color-primary))] transition-all duration-200 interactive-focus"
                 aria-label="View Starknet transactions on Starkscan explorer"
               >
-                Explorer
+                <span>Explorer</span>
               </a>
             </div>
           </div>
