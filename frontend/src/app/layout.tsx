@@ -10,8 +10,19 @@ export const metadata: Metadata = {
   description: 'Modern QR code payment system built on Starknet. Accept crypto payments instantly with 2% platform fee.',
   keywords: ['Starknet', 'QR', 'payments', 'crypto', 'blockchain', 'USDC', 'USDT'],
   authors: [{ name: 'StarkPay Team' }],
-  viewport: 'width=device-width, initial-scale=1',
-  themeColor: '#f97316',
+}
+
+export function generateViewport() {
+  return {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+    themeColor: [
+      { media: '(prefers-color-scheme: light)', color: '#f97316' },
+      { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
+    ],
+  }
 }
 
 export default function RootLayout({
@@ -27,11 +38,22 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#f97316" />
         <meta name="theme-color" content="#0f172a" />
       </head>
-      <body className={`${inter.className} bg-dark-900 text-white antialiased`}>
-        <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900">
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23f97316" fill-opacity="0.05"%3E%3Ccircle cx="7" cy="7" r="7"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
+      <body className={`${inter.className} bg-slate-900 text-white antialiased`}>
+        {/* Skip to content link for screen readers */}
+        <a 
+          href="#main-content" 
+          className="skip-link"
+          aria-label="Skip to main content"
+        >
+          Skip to main content
+        </a>
+        
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 to-orange-500/5 opacity-20"></div>
           <div className="relative z-10">
-            {children}
+            <main id="main-content" tabIndex={-1}>
+              {children}
+            </main>
           </div>
         </div>
         <Toaster
