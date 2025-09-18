@@ -63,13 +63,28 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      {/* Skip Link for accessibility */}
+      <a 
+        href="#main-content" 
+        className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 z-50 bg-orange-600 text-white px-4 py-2 rounded-br-lg font-medium"
+      >
+        Skip to main content
+      </a>
+      
       {/* Demo Mode Banner */}
-      <div className="bg-yellow-900/20 border-b border-yellow-500/20 px-4 py-3">
+      <div 
+        className="bg-yellow-900/20 border-b border-yellow-500/20 px-4 py-3" 
+        role="banner" 
+        aria-label="Demo mode notification"
+      >
         <div className="container mx-auto">
           <div className="flex items-center justify-center space-x-2 text-sm">
-            <div className="h-2 w-2 rounded-full bg-yellow-500"></div>
+            <div 
+              className="h-2 w-2 rounded-full bg-yellow-500" 
+              aria-hidden="true"
+            ></div>
             <span className="text-yellow-200">
-              Demo Mode - Connect wallet to interact with Starknet contracts
+              <strong>Demo Mode</strong> - Connect wallet to interact with Starknet contracts
             </span>
           </div>
         </div>
@@ -204,20 +219,25 @@ export default function HomePage() {
           </div>
 
           {/* Tab Content */}
-          <main className="container mx-auto px-4 py-8">
+          <main id="main-content" className="container mx-auto px-4 py-8" role="main">
             {activeTab === 'merchant' && (
-              <div className="space-y-8">
+              <div id="tabpanel-merchant" role="tabpanel" aria-labelledby="tab-merchant" className="space-y-8">
                 <div className="text-center">
-                  <h2 className="text-3xl font-bold text-white mb-2">Merchant Dashboard</h2>
-                  <p className="text-slate-400">
+                  <h2 className="heading-2 mb-2">Merchant Dashboard</h2>
+                  <p className="body-base text-muted">
                     Manage your payments and generate QR codes for customers
                   </p>
                 </div>
                 
                 {isCheckingRegistration ? (
-                  <div className="text-center py-12">
-                    <div className="animate-spin inline-block h-8 w-8 border-4 border-orange-500 border-r-transparent rounded-full"></div>
-                    <p className="text-slate-400 mt-4">Checking merchant registration...</p>
+                  <div className="text-center py-12" role="status" aria-live="polite">
+                    <div className="loading-spinner-lg mx-auto" aria-hidden="true"></div>
+                    <p className="body-base text-muted mt-4">
+                      Checking merchant registration<span className="loading-dots"></span>
+                    </p>
+                    <p className="body-small text-slate-500 mt-2">
+                      Verifying with blockchain...
+                    </p>
                   </div>
                 ) : (
                   <MerchantDashboard 
@@ -230,10 +250,10 @@ export default function HomePage() {
             )}
 
             {activeTab === 'payment' && (
-              <div className="space-y-8">
+              <div id="tabpanel-payment" role="tabpanel" aria-labelledby="tab-payment" className="space-y-8">
                 <div className="text-center">
-                  <h2 className="text-3xl font-bold text-white mb-2">Make Payment</h2>
-                  <p className="text-slate-400">
+                  <h2 className="heading-2 mb-2">Make Payment</h2>
+                  <p className="body-base text-muted">
                     Scan a QR code to pay a merchant
                   </p>
                 </div>
@@ -242,14 +262,14 @@ export default function HomePage() {
             )}
 
             {activeTab === 'analytics' && (
-              <div className="space-y-8">
+              <div id="tabpanel-analytics" role="tabpanel" aria-labelledby="tab-analytics" className="space-y-8">
                 <div className="text-center">
-                  <h2 className="text-3xl font-bold text-white mb-2">Platform Analytics</h2>
-                  <p className="text-slate-400">
+                  <h2 className="heading-2 mb-2">Platform Analytics</h2>
+                  <p className="body-base text-muted">
                     View transaction statistics and platform metrics
                   </p>
                 </div>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
                   <PlatformStats />
                   <RecentTransactions />
                 </div>

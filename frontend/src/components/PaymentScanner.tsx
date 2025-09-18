@@ -5,7 +5,7 @@ import { apiClient } from '@/lib/api';
 import { contractService } from '@/lib/contracts';
 import { walletManager } from '@/lib/wallet';
 import type { PaymentDetails } from '@/types';
-import { Camera, Upload, AlertCircle, CheckCircle, Clock, ExternalLink } from 'lucide-react';
+import { Camera, Upload, AlertCircle, CheckCircle, Clock, ExternalLink, QrCode } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface PaymentScannerProps {
@@ -358,41 +358,52 @@ export function PaymentScanner({ walletAddress }: PaymentScannerProps) {
   }
 
   return (
-    <div className="max-w-md mx-auto">
-      <div className="rounded-lg bg-slate-800 p-6 border border-slate-700">
-        <h3 className="text-xl font-semibold text-white mb-6 text-center">
-          Scan Payment QR Code
-        </h3>
+    <div className="max-w-lg mx-auto">
+      <div className="card p-6 sm:p-8 mobile-card">
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center">
+            <QrCode className="h-8 w-8 text-white" />
+          </div>
+          <h3 className="heading-3 mb-2">
+            Scan Payment QR Code
+          </h3>
+          <p className="body-small text-muted">
+            Choose your preferred scanning method
+          </p>
+        </div>
         
         {/* Scan Mode Selector */}
-        <div className="flex rounded-lg bg-slate-700 p-1 mb-6">
+        <div className="flex rounded-xl bg-slate-700/50 p-1 mb-6 sm:mb-8">
           <button
             onClick={() => setScanMode('url')}
-            className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+            className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 touch-target ${
               scanMode === 'url'
-                ? 'bg-orange-500 text-white'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-orange-500 text-white shadow-md'
+                : 'text-slate-400 hover:text-white hover:bg-slate-600/50'
             }`}
+            aria-pressed={scanMode === 'url'}
           >
             URL
           </button>
           <button
             onClick={() => setScanMode('upload')}
-            className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+            className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 touch-target ${
               scanMode === 'upload'
-                ? 'bg-orange-500 text-white'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-orange-500 text-white shadow-md'
+                : 'text-slate-400 hover:text-white hover:bg-slate-600/50'
             }`}
+            aria-pressed={scanMode === 'upload'}
           >
             Upload
           </button>
           <button
             onClick={() => setScanMode('camera')}
-            className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+            className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 touch-target ${
               scanMode === 'camera'
-                ? 'bg-orange-500 text-white'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-orange-500 text-white shadow-md'
+                : 'text-slate-400 hover:text-white hover:bg-slate-600/50'
             }`}
+            aria-pressed={scanMode === 'camera'}
           >
             Camera
           </button>
@@ -400,31 +411,37 @@ export function PaymentScanner({ walletAddress }: PaymentScannerProps) {
         
         {/* URL Input */}
         {scanMode === 'url' && (
-          <div className="space-y-4">
+          <div className="space-y-6 animate-fadeIn">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label htmlFor="payment-url" className="block text-sm font-medium text-slate-300 mb-3">
                 Payment URL
               </label>
               <input
+                id="payment-url"
                 type="url"
                 value={paymentUrl}
                 onChange={(e) => setPaymentUrl(e.target.value)}
-                placeholder="Paste payment URL here..."
-                className="w-full rounded-lg bg-slate-700 border border-slate-600 px-3 py-2 text-white placeholder-slate-400 focus:border-orange-500 focus:outline-none"
+                placeholder="https://starkpay.app/pay/..."
+                className="input-primary h-12"
+                aria-describedby="url-help"
               />
+              <p id="url-help" className="text-xs text-slate-500 mt-2">
+                Paste the payment URL you received from the merchant
+              </p>
             </div>
             <button
               onClick={handleUrlSubmit}
               disabled={isLoading || !paymentUrl}
-              className="w-full rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 px-4 py-2 font-medium text-white hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="btn-primary w-full mobile-button"
+              aria-describedby={isLoading ? "loading-status" : undefined}
             >
               {isLoading ? (
                 <div className="flex items-center justify-center space-x-2">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-r-transparent"></div>
-                  <span>Loading...</span>
+                  <div className="loading-spinner" aria-hidden="true"></div>
+                  <span id="loading-status">Loading<span className="loading-dots"></span></span>
                 </div>
               ) : (
-                'Load Payment'
+                'Load Payment Details'
               )}
             </button>
           </div>
@@ -432,21 +449,36 @@ export function PaymentScanner({ walletAddress }: PaymentScannerProps) {
         
         {/* File Upload */}
         {scanMode === 'upload' && (
-          <div className="space-y-4">
+          <div className="animate-fadeIn">
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center cursor-pointer hover:border-orange-500 transition-colors"
+              className="border-2 border-dashed border-slate-600 rounded-xl p-8 sm:p-12 text-center cursor-pointer hover:border-orange-500 hover:bg-slate-700/30 transition-all duration-200 group focus-within:ring-2 focus-within:ring-orange-500/50"
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  fileInputRef.current?.click();
+                }
+              }}
+              aria-label="Upload QR code image"
             >
-              <Upload className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-              <p className="text-slate-400 mb-2">Click to upload QR code image</p>
-              <p className="text-slate-500 text-sm">PNG, JPG, GIF up to 10MB</p>
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-700 group-hover:bg-orange-500/20 transition-colors duration-200 flex items-center justify-center">
+                <Upload className="h-8 w-8 text-slate-400 group-hover:text-orange-500 transition-colors duration-200" />
+              </div>
+              <p className="body-base text-slate-300 mb-2">Click to upload QR code image</p>
+              <p className="body-small text-slate-500">PNG, JPG, GIF up to 10MB</p>
+              <div className="mt-4 text-xs text-slate-600">
+                <strong>Note:</strong> QR scanning is demo only
+              </div>
             </div>
             <input
               ref={fileInputRef}
               type="file"
               accept="image/*"
               onChange={handleFileUpload}
-              className="hidden"
+              className="sr-only"
+              aria-describedby="upload-help"
             />
           </div>
         )}
