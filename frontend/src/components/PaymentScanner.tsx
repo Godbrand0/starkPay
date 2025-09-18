@@ -5,7 +5,7 @@ import { apiClient } from '@/lib/api';
 import { contractService } from '@/lib/contracts';
 import { walletManager } from '@/lib/wallet';
 import type { PaymentDetails } from '@/types';
-import { Camera, Upload, AlertCircle, CheckCircle, Clock, ExternalLink, QrCode } from 'lucide-react';
+import { Camera, Upload, AlertCircle, CheckCircle, Clock, ExternalLink, QrCode, CreditCard } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface PaymentScannerProps {

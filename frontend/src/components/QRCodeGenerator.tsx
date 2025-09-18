@@ -6,7 +6,7 @@ import QRCode from 'react-qr-code';
 import { apiClient } from '@/lib/api';
 import { contractService } from '@/lib/contracts';
 import type { Token, QRCodeData } from '@/types';
-import { QrCode, Download, Copy, Check, RefreshCw } from 'lucide-react';
+import { QrCode, Download, Copy, Check, RefreshCw, BarChart3 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface QRCodeGeneratorProps {
