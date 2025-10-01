@@ -236,15 +236,15 @@ export const getETHBalance = async (address: string): Promise<bigint> => {
 export const TOKENS = {
   USDC: {
     address: MOCK_USDC_ADDRESS,
-    symbol: "mUSDC",
-    name: "Mock USD Coin",
-    decimals: 6,
+    symbol: "ETH",
+    name: "Ethereum",
+    decimals: 18,
   },
   USDT: {
     address: MOCK_USDT_ADDRESS,
-    symbol: "mUSDT",
-    name: "Mock Tether USD",
-    decimals: 6,
+    symbol: "ETH",
+    name: "Ethereum",
+    decimals: 18,
   },
   ETH: {
     address: ETH_TOKEN_ADDRESS,

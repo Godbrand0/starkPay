@@ -119,7 +119,6 @@ mod SimplePaymentProcessor {
     #[abi(embed_v0)]
     impl PaymentProcessorImpl of crate::interfaces::IPaymentProcessor<ContractState> {
         fn register_merchant(ref self: ContractState, merchant_address: ContractAddress) {
-            let caller = get_caller_address();
             assert(!merchant_address.is_zero(), 'Merchant cannot be zero address');
             assert(!self.registered_merchants.read(merchant_address), 'Merchant already registered');
 

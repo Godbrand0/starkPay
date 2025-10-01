@@ -8,8 +8,7 @@ import { getPaymentDetails } from '@/lib/api';
 import { processPayment, approveToken, checkTokenAllowance, getTokenBalance, formatTokenAmount, parseTokenAmount, TOKENS } from '@/lib/contract';
 import { getConnectedWallet } from '@/lib/wallet';
 import { openAnyWallet, isMobileDevice } from '@/lib/walletDeepLink';
-import { BuyTokensModal } from '@/components/BuyTokensModal';
-import { QrCode, CheckCircle, XCircle, Loader, ArrowLeft, Wallet, ShoppingCart } from 'lucide-react';
+import { QrCode, CheckCircle, XCircle, Loader, ArrowLeft, Wallet } from 'lucide-react';
 import Link from 'next/link';
 
 function PaymentContent() {
@@ -24,7 +23,6 @@ function PaymentContent() {
   const [txHash, setTxHash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [balance, setBalance] = useState<string>('0');
-  const [showBuyModal, setShowBuyModal] = useState(false);
 
   // Get payment params from URL
   const merchantAddress = searchParams.get('m');
@@ -72,7 +70,7 @@ function PaymentContent() {
 
       try {
         const bal = await getTokenBalance(tokenAddress, address);
-        setBalance(formatTokenAmount(bal, 6));
+        setBalance(formatTokenAmount(bal, 18));
       } catch (error) {
         console.error('Failed to fetch balance:', error);
       }
@@ -103,7 +101,7 @@ function PaymentContent() {
         throw new Error('Wallet not connected');
       }
 
-      const amountBigInt = parseTokenAmount(amount, 6);
+      const amountBigInt = parseTokenAmount(amount, 18);
       const paymentProcessorAddress = process.env.NEXT_PUBLIC_PAYMENT_PROCESSOR_ADDRESS!;
 
       // Check allowance
@@ -252,23 +250,10 @@ function PaymentContent() {
 
             {isConnected && (
               <div className="bg-blue-50 p-4 rounded-lg">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="text-sm text-blue-700 mb-1">Your Balance</p>
-                    <p className="font-semibold text-blue-900">
-                      {balance} {getTokenSymbol(tokenAddress)}
-                    </p>
-                  </div>
-                  {parseFloat(balance) < parseFloat(amount) && (
-                    <button
-                      onClick={() => setShowBuyModal(true)}
-                      className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded-md text-sm font-medium flex items-center gap-1"
-                    >
-                      <ShoppingCart className="h-4 w-4" />
-                      Buy
-                    </button>
-                  )}
-                </div>
+                <p className="text-sm text-blue-700 mb-1">Your Balance</p>
+                <p className="font-semibold text-blue-900">
+                  {balance} {getTokenSymbol(tokenAddress)}
+                </p>
                 {parseFloat(balance) < parseFloat(amount) && (
                   <p className="text-xs text-red-600 mt-2">
                     ⚠️ Insufficient balance. You need {(parseFloat(amount) - parseFloat(balance)).toFixed(6)} more {getTokenSymbol(tokenAddress)}
@@ -323,23 +308,6 @@ function PaymentContent() {
             Cancel
           </Link>
         </div>
-
-        <BuyTokensModal
-          isOpen={showBuyModal}
-          onClose={() => setShowBuyModal(false)}
-          tokenAddress={tokenAddress || ''}
-          tokenSymbol={getTokenSymbol(tokenAddress || '')}
-          requiredAmount={amount || '0'}
-          userAddress={address || ''}
-          onSuccess={() => {
-            // Refresh balance after purchase
-            if (address && tokenAddress) {
-              getTokenBalance(tokenAddress, address).then(bal => {
-                setBalance(formatTokenAmount(bal, 6));
-              });
-            }
-          }}
-        />
       </main>
     </div>
   );

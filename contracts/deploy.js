@@ -21,6 +21,7 @@ const TREASURY_ADDRESS = process.env.TREASURY_ADDRESS;     // Treasury wallet ad
 // Token addresses for whitelisting (Sepolia testnet)
 const USDC_ADDRESS = process.env.USDC_TOKEN_ADDRESS || "0x053b40a647cedfca6ca84f542a0fe36736031905a9639a7f19a3c1e66bfd5080"; // Sepolia USDC
 const USDT_ADDRESS = process.env.USDT_TOKEN_ADDRESS || "0x068f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8"; // Sepolia USDT
+const ETH_TOKEN_ADDRESS = "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"; // Starknet ETH on Sepolia
 
 async function main() {
   console.log("=".repeat(60));
@@ -97,6 +98,7 @@ async function main() {
     const constructorCalldata = CallData.compile({
       owner: OWNER_ADDRESS,
       treasury_address: TREASURY_ADDRESS,
+      eth_token_address: ETH_TOKEN_ADDRESS,
     });
 
     const deployResponse = await deployerAccount.deployContract({
@@ -164,7 +166,27 @@ async function main() {
     console.log(`  USDC Whitelisted: ${isUsdcWhitelisted}`);
     console.log(`  USDT Whitelisted: ${isUsdtWhitelisted}`);
 
-    // Step 6: Save deployment info
+    // Step 7: Set token prices for buy feature
+    console.log("\n💰 Setting token prices...");
+    const tokenPrice = "500000000000000"; // 0.0005 ETH per token
+
+    console.log("  Setting USDC price...");
+    const usdcPriceTx = await contractWithOwner.set_token_price(USDC_ADDRESS, tokenPrice);
+    await provider.waitForTransaction(usdcPriceTx.transaction_hash);
+    console.log(`  ✅ USDC price set to 0.0005 ETH (tx: ${usdcPriceTx.transaction_hash})`);
+
+    console.log("  Setting USDT price...");
+    const usdtPriceTx = await contractWithOwner.set_token_price(USDT_ADDRESS, tokenPrice);
+    await provider.waitForTransaction(usdtPriceTx.transaction_hash);
+    console.log(`  ✅ USDT price set to 0.0005 ETH (tx: ${usdtPriceTx.transaction_hash})`);
+
+    // Verify prices
+    const usdcPrice = await contract.get_token_price(USDC_ADDRESS);
+    const usdtPrice = await contract.get_token_price(USDT_ADDRESS);
+    console.log(`  USDC Price: ${usdcPrice} wei`);
+    console.log(`  USDT Price: ${usdtPrice} wei`);
+
+    // Step 8: Save deployment info
     console.log("\n💾 Saving deployment info...");
     const deploymentInfo = {
       network: "sepolia",
@@ -172,10 +194,15 @@ async function main() {
       classHash: classHash,
       ownerAddress: OWNER_ADDRESS,
       treasuryAddress: TREASURY_ADDRESS,
+      ethTokenAddress: ETH_TOKEN_ADDRESS,
       platformFeeBasisPoints: Number(feeOnChain),
       whitelistedTokens: {
         USDC: USDC_ADDRESS,
         USDT: USDT_ADDRESS,
+      },
+      tokenPrices: {
+        USDC: "500000000000000",
+        USDT: "500000000000000",
       },
       deploymentTimestamp: new Date().toISOString(),
       declareTransactionHash: declareResponse.transaction_hash,
@@ -214,11 +241,14 @@ async function main() {
     console.log(`\n🪙 Whitelisted Tokens:`);
     console.log(`  USDC: ${USDC_ADDRESS}`);
     console.log(`  USDT: ${USDT_ADDRESS}`);
+    console.log(`\n💰 Token Prices:`);
+    console.log(`  USDC: 0.0005 ETH per token`);
+    console.log(`  USDT: 0.0005 ETH per token`);
     console.log("\n📋 Next Steps:");
-    console.log("  1. Update frontend .env.local with new CONTRACT_ADDRESS");
-    console.log("  2. Update backend .env with new PAYMENT_PROCESSOR_ADDRESS");
-    console.log("  3. Test merchant registration");
-    console.log("  4. Test payment processing");
+    console.log("  1. Fund contract with tokens: node scripts/mint-tokens.js <CONTRACT_ADDRESS> 10000");
+    console.log("  2. Update frontend .env.local with new CONTRACT_ADDRESS");
+    console.log("  3. Update backend .env with new PAYMENT_PROCESSOR_ADDRESS");
+    console.log("  4. Test token purchase and payment flows");
     console.log(`\n🔗 View on Starkscan:`);
     console.log(`  https://sepolia.starkscan.co/contract/${contractAddress}`);
     console.log("\n" + "=".repeat(60));
