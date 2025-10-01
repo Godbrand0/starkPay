@@ -16,6 +16,8 @@ mod SimplePaymentProcessor {
         whitelisted_tokens: Map<ContractAddress, bool>,   // Allowed tokens
         platform_fee_basis_points: u256,               // 200 = 2%
         reentrancy_guard: bool,
+        token_prices: Map<ContractAddress, u256>,      // Token prices in ETH (wei per token with decimals)
+        eth_token_address: ContractAddress,             // ETH token address on Starknet
     }
 
     #[event]
@@ -25,6 +27,8 @@ mod SimplePaymentProcessor {
         PaymentProcessed: PaymentProcessed,
         TokenWhitelisted: TokenWhitelisted,
         FeeUpdated: FeeUpdated,
+        TokensPurchased: TokensPurchased,
+        TokenPriceUpdated: TokenPriceUpdated,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -60,18 +64,39 @@ mod SimplePaymentProcessor {
         new_fee: u256
     }
 
+    #[derive(Drop, starknet::Event)]
+    struct TokensPurchased {
+        #[key]
+        buyer: ContractAddress,
+        token: ContractAddress,
+        eth_amount: u256,
+        token_amount: u256,
+        timestamp: u64
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct TokenPriceUpdated {
+        #[key]
+        token: ContractAddress,
+        old_price: u256,
+        new_price: u256
+    }
+
     #[constructor]
     fn constructor(
         ref self: ContractState,
         owner: ContractAddress,
-        treasury_address: ContractAddress
+        treasury_address: ContractAddress,
+        eth_token_address: ContractAddress
     ) {
         assert(!owner.is_zero(), 'Owner cannot be zero address');
         assert(!treasury_address.is_zero(), 'Treasury cannot be zero address');
-        
+        assert(!eth_token_address.is_zero(), 'ETH address cannot be zero');
+
         self.owner.write(owner);
         self.treasury_address.write(treasury_address);
-        
+        self.eth_token_address.write(eth_token_address);
+
         let initial_fee = 200_u256; // 2%
         assert(initial_fee <= 1000, 'Initial fee too high'); // Max 10%
         self.platform_fee_basis_points.write(initial_fee);
@@ -162,6 +187,58 @@ mod SimplePaymentProcessor {
             self._nonreentrant_end();
         }
 
+        fn buy_tokens_with_eth(
+            ref self: ContractState,
+            token_address: ContractAddress,
+            min_tokens: u256
+        ) {
+            self._nonreentrant_start();
+
+            assert(!token_address.is_zero(), 'Token cannot be zero address');
+            assert(self.whitelisted_tokens.read(token_address), 'Token not whitelisted');
+
+            let caller = get_caller_address();
+            let contract_address = starknet::get_contract_address();
+            let eth_token_addr = self.eth_token_address.read();
+
+            // Get ETH token contract
+            let eth_token = IERC20Dispatcher { contract_address: eth_token_addr };
+
+            // Check ETH allowance
+            let eth_allowance = eth_token.allowance(caller, contract_address);
+            assert(eth_allowance > 0, 'No ETH allowance');
+
+            // Get token price (wei per token)
+            let token_price = self.token_prices.read(token_address);
+            assert(token_price > 0, 'Token price not set');
+
+            // Calculate how many tokens can be bought
+            let token_amount = (eth_allowance * 1000000) / token_price; // Assuming 6 decimals for tokens
+            assert(token_amount >= min_tokens, 'Insufficient ETH for min tokens');
+
+            // Calculate actual ETH needed
+            let eth_needed = (token_amount * token_price) / 1000000;
+
+            // Transfer ETH from buyer to treasury
+            let success = eth_token.transfer_from(caller, self.treasury_address.read(), eth_needed);
+            assert(success, 'ETH transfer failed');
+
+            // Transfer tokens to buyer (from treasury or contract)
+            let token = IERC20Dispatcher { contract_address: token_address };
+            let token_success = token.transfer(caller, token_amount);
+            assert(token_success, 'Token transfer failed');
+
+            self.emit(TokensPurchased {
+                buyer: caller,
+                token: token_address,
+                eth_amount: eth_needed,
+                token_amount: token_amount,
+                timestamp: get_block_timestamp()
+            });
+
+            self._nonreentrant_end();
+        }
+
         // ---- ADMIN FUNCTIONS ----
         fn whitelist_token(ref self: ContractState, token_address: ContractAddress, whitelisted: bool) {
             let caller = get_caller_address();
@@ -190,6 +267,22 @@ mod SimplePaymentProcessor {
             });
         }
 
+        fn set_token_price(ref self: ContractState, token_address: ContractAddress, eth_price: u256) {
+            let caller = get_caller_address();
+            assert(caller == self.owner.read(), 'Only owner can set price');
+            assert(!token_address.is_zero(), 'Token cannot be zero address');
+            assert(eth_price > 0, 'Price must be positive');
+
+            let old_price = self.token_prices.read(token_address);
+            self.token_prices.write(token_address, eth_price);
+
+            self.emit(TokenPriceUpdated {
+                token: token_address,
+                old_price: old_price,
+                new_price: eth_price
+            });
+        }
+
         // ---- VIEWS ----
         fn is_merchant_registered(self: @ContractState, merchant_address: ContractAddress) -> bool {
             self.registered_merchants.read(merchant_address)
@@ -205,6 +298,10 @@ mod SimplePaymentProcessor {
 
         fn get_platform_fee_basis_points(self: @ContractState) -> u256 {
             self.platform_fee_basis_points.read()
+        }
+
+        fn get_token_price(self: @ContractState, token_address: ContractAddress) -> u256 {
+            self.token_prices.read(token_address)
         }
     }
 }

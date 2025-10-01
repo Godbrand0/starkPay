@@ -177,6 +177,62 @@ export const parseTokenAmount = (amount: string, decimals: number = 6): bigint =
   return BigInt(fullAmount);
 };
 
+// Starknet ETH token address (Sepolia)
+const ETH_TOKEN_ADDRESS = "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
+
+export const buyTokensWithETH = async (
+  account: AccountInterface,
+  tokenAddress: string,
+  ethAmount: bigint,
+  minTokens: bigint
+) => {
+  try {
+    // First approve ETH spending
+    const ethToken = getTokenContract(ETH_TOKEN_ADDRESS, account);
+    const approveCall = ethToken.populate("approve", [
+      PAYMENT_PROCESSOR_ADDRESS,
+      cairo.uint256(ethAmount)
+    ]);
+
+    // Then buy tokens
+    const contract = getPaymentProcessorContract(account);
+    const buyCall = contract.populate("buy_tokens_with_eth", [
+      tokenAddress,
+      cairo.uint256(minTokens)
+    ]);
+
+    // Execute both calls in one transaction
+    const tx = await account.execute([approveCall, buyCall]);
+    await provider.waitForTransaction(tx.transaction_hash);
+    return tx.transaction_hash;
+  } catch (error) {
+    console.error("Error buying tokens:", error);
+    throw error;
+  }
+};
+
+export const getTokenPrice = async (tokenAddress: string): Promise<bigint> => {
+  try {
+    const contract = getPaymentProcessorContract();
+    const price = await contract.get_token_price(tokenAddress);
+    return BigInt(price.toString());
+  } catch (error) {
+    console.error("Error getting token price:", error);
+    return 0n;
+  }
+};
+
+export const getETHBalance = async (address: string): Promise<bigint> => {
+  try {
+    const ethToken = getTokenContract(ETH_TOKEN_ADDRESS);
+    const balance = await ethToken.balanceOf(address);
+    return BigInt(balance.toString());
+  } catch (error) {
+    console.error("Error getting ETH balance:", error);
+    return 0n;
+  }
+};
+
 export const TOKENS = {
   USDC: {
     address: MOCK_USDC_ADDRESS,
@@ -189,5 +245,11 @@ export const TOKENS = {
     symbol: "mUSDT",
     name: "Mock Tether USD",
     decimals: 6,
+  },
+  ETH: {
+    address: ETH_TOKEN_ADDRESS,
+    symbol: "ETH",
+    name: "Ethereum",
+    decimals: 18,
   },
 };
