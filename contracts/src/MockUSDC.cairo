@@ -1,90 +1,126 @@
 #[starknet::contract]
 mod MockUSDC {
-    use starknet::ContractAddress;
-    use openzeppelin::token::erc20::ERC20Component;
-    use openzeppelin::access::ownable::OwnableComponent;
-
-    component!(path: ERC20Component, storage: erc20, event: ERC20Event);
-    component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
-
-    // ERC20 Hooks
-    impl ERC20HooksEmptyImpl = ERC20Component::ERC20HooksEmptyImpl<ContractState>;
-
-    #[abi(embed_v0)]
-    impl ERC20Impl = ERC20Component::ERC20Impl<ContractState>;
-    #[abi(embed_v0)]
-    impl ERC20MetadataImpl = ERC20Component::ERC20MetadataImpl<ContractState>;
-    #[abi(embed_v0)]
-    impl OwnableImpl = OwnableComponent::OwnableImpl<ContractState>;
-    impl ERC20InternalImpl = ERC20Component::InternalImpl<ContractState>;
-    impl OwnableInternalImpl = OwnableComponent::InternalImpl<ContractState>;
+    use starknet::{ContractAddress, get_caller_address};
+    use starknet::storage::{Map, StorageMapReadAccess, StorageMapWriteAccess, StoragePointerReadAccess, StoragePointerWriteAccess};
+    use core::num::traits::Zero;
 
     #[storage]
     struct Storage {
-        #[substorage(v0)]
-        erc20: ERC20Component::Storage,
-        #[substorage(v0)]
-        ownable: OwnableComponent::Storage,
+        name: ByteArray,
+        symbol: ByteArray,
+        decimals: u8,
+        total_supply: u256,
+        balances: Map<ContractAddress, u256>,
+        allowances: Map<(ContractAddress, ContractAddress), u256>,
+        owner: ContractAddress,
     }
 
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
-        #[flat]
-        ERC20Event: ERC20Component::Event,
-        #[flat]
-        OwnableEvent: OwnableComponent::Event,
+        Transfer: Transfer,
+        Approval: Approval,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct Transfer {
+        #[key]
+        from: ContractAddress,
+        #[key]
+        to: ContractAddress,
+        value: u256,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct Approval {
+        #[key]
+        owner: ContractAddress,
+        #[key]
+        spender: ContractAddress,
+        value: u256,
     }
 
     #[constructor]
     fn constructor(ref self: ContractState, owner: ContractAddress) {
-        self.erc20.initializer("Mock USD Coin", "mUSDC");
-        self.ownable.initializer(owner);
+        self.name.write("Mock USD Coin");
+        self.symbol.write("mUSDC");
+        self.decimals.write(6_u8);
+        self.total_supply.write(0);
+        self.owner.write(owner);
     }
 
     #[abi(embed_v0)]
     impl MockTokenImpl of crate::interfaces::IMockToken<ContractState> {
         fn name(self: @ContractState) -> ByteArray {
-            self.erc20.name()
+            self.name.read()
         }
 
         fn symbol(self: @ContractState) -> ByteArray {
-            self.erc20.symbol()
+            self.symbol.read()
         }
 
         fn decimals(self: @ContractState) -> u8 {
-            6_u8
+            self.decimals.read()
         }
 
         fn total_supply(self: @ContractState) -> u256 {
-            self.erc20.total_supply()
+            self.total_supply.read()
         }
 
         fn balance_of(self: @ContractState, account: ContractAddress) -> u256 {
-            self.erc20.balance_of(account)
+            self.balances.read(account)
         }
 
         fn allowance(self: @ContractState, owner: ContractAddress, spender: ContractAddress) -> u256 {
-            self.erc20.allowance(owner, spender)
+            self.allowances.read((owner, spender))
         }
 
         fn transfer(ref self: ContractState, to: ContractAddress, amount: u256) -> bool {
-            self.erc20.transfer(to, amount)
+            let caller = get_caller_address();
+            self._transfer(caller, to, amount);
+            true
         }
 
         fn transfer_from(
             ref self: ContractState, from: ContractAddress, to: ContractAddress, amount: u256
         ) -> bool {
-            self.erc20.transfer_from(from, to, amount)
+            let caller = get_caller_address();
+            let current_allowance = self.allowances.read((from, caller));
+            assert(current_allowance >= amount, 'Insufficient allowance');
+            self.allowances.write((from, caller), current_allowance - amount);
+            self._transfer(from, to, amount);
+            true
         }
 
         fn approve(ref self: ContractState, spender: ContractAddress, amount: u256) -> bool {
-            self.erc20.approve(spender, amount)
+            let caller = get_caller_address();
+            self.allowances.write((caller, spender), amount);
+            self.emit(Approval { owner: caller, spender, value: amount });
+            true
         }
 
         fn mint(ref self: ContractState, to: ContractAddress, amount: u256) {
-            self.ownable.assert_only_owner();
-            self.erc20._mint(to, amount);
+            let caller = get_caller_address();
+            assert(caller == self.owner.read(), 'Only owner can mint');
+            let new_total_supply = self.total_supply.read() + amount;
+            self.total_supply.write(new_total_supply);
+            let new_balance = self.balances.read(to) + amount;
+            self.balances.write(to, new_balance);
+            self.emit(Transfer { from: Zero::zero(), to, value: amount });
+        }
+    }
+
+    #[generate_trait]
+    impl InternalImpl of InternalTrait {
+        fn _transfer(ref self: ContractState, from: ContractAddress, to: ContractAddress, amount: u256) {
+            assert(!from.is_zero(), 'Transfer from zero address');
+            assert(!to.is_zero(), 'Transfer to zero address');
+            let from_balance = self.balances.read(from);
+            assert(from_balance >= amount, 'Insufficient balance');
+            self.balances.write(from, from_balance - amount);
+            let to_balance = self.balances.read(to);
+            self.balances.write(to, to_balance + amount);
+            self.emit(Transfer { from, to, value: amount });
         }
     }
 }

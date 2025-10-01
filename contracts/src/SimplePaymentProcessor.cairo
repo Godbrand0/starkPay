@@ -1,15 +1,20 @@
 #[starknet::contract]
 mod SimplePaymentProcessor {
-    use starknet::{ContractAddress, get_caller_address, get_block_timestamp, storage::{Map, StorageMapReadAccess, StorageMapWriteAccess, StoragePointerReadAccess, StoragePointerWriteAccess}};
+    use crate::interfaces::{IERC20Dispatcher, IERC20DispatcherTrait};
+    use starknet::{
+        ContractAddress, get_caller_address, get_block_timestamp,
+        storage::{Map, StorageMapReadAccess, StorageMapWriteAccess,
+                  StoragePointerReadAccess, StoragePointerWriteAccess}
+    };
     use core::num::traits::Zero;
     
     #[storage]
     struct Storage {
-        owner: ContractAddress,
-        treasury_address: ContractAddress,
-        registered_merchants: Map<ContractAddress, bool>,
-        whitelisted_tokens: Map<ContractAddress, bool>,
-        platform_fee_basis_points: u256, // 200 = 2%
+        owner: ContractAddress,                         // Admin
+        treasury_address: ContractAddress,              // Treasury (receives fees)
+        registered_merchants: Map<ContractAddress, bool>, // Merchants
+        whitelisted_tokens: Map<ContractAddress, bool>,   // Allowed tokens
+        platform_fee_basis_points: u256,               // 200 = 2%
         reentrancy_guard: bool,
     }
 
@@ -73,7 +78,7 @@ mod SimplePaymentProcessor {
         self.reentrancy_guard.write(false);
     }
 
-    // Internal functions for better reentrancy protection
+    // Internal functions for reentrancy protection
     #[generate_trait]
     impl InternalImpl of InternalTrait {
         fn _nonreentrant_start(ref self: ContractState) {
@@ -90,12 +95,11 @@ mod SimplePaymentProcessor {
     impl PaymentProcessorImpl of crate::interfaces::IPaymentProcessor<ContractState> {
         fn register_merchant(ref self: ContractState, merchant_address: ContractAddress) {
             let caller = get_caller_address();
-            assert(caller == self.owner.read(), 'Only owner can register');
             assert(!merchant_address.is_zero(), 'Merchant cannot be zero address');
             assert(!self.registered_merchants.read(merchant_address), 'Merchant already registered');
-            
+
             self.registered_merchants.write(merchant_address, true);
-            
+
             self.emit(MerchantRegistered {
                 merchant: merchant_address,
                 timestamp: get_block_timestamp()
@@ -108,7 +112,6 @@ mod SimplePaymentProcessor {
             token_address: ContractAddress,
             amount: u256
         ) {
-            // Reentrancy guard
             self._nonreentrant_start();
             
             // Input validations
@@ -122,19 +125,29 @@ mod SimplePaymentProcessor {
             let treasury = self.treasury_address.read();
             let fee_basis_points = self.platform_fee_basis_points.read();
 
-            // Safe math calculations with overflow protection
-            let max_fee_calculation = u256 { low: 0xffffffffffffffffffffffffffffffff, high: 0xffffffffffffffffffffffffffffffff } / fee_basis_points;
-            assert(amount <= max_fee_calculation, 'Amount too large');
+            let token = IERC20Dispatcher { contract_address: token_address };
             
-            let fee = (amount * fee_basis_points) / 10000;
-            assert(fee <= amount, 'Fee calculation overflow');
-            let net_amount = amount - fee;
+            // CRITICAL: Check payer has sufficient balance
+            let balance = token.balance_of(caller);
+            assert(balance >= amount, 'Insufficient balance');
+            
+            // CRITICAL: Check allowance before attempting transfer_from
+            let allowance = token.allowance(caller, starknet::get_contract_address());
+            assert(allowance >= amount, 'Insufficient allowance');
 
-            // Simulate token transfers (since we don't have IERC20 interface)
-            // In a real implementation, you would call the token contract here
-            // For now, we just validate and emit the event
-            // Ensure treasury is valid for transfer
-            assert(!treasury.is_zero(), 'Treasury cannot be zero');
+            // Calculate fees
+            let fee = (amount * fee_basis_points) / 10000;
+            let net_amount = amount - fee;
+            
+            // Transfer fee to treasury
+            if fee > 0 {
+                let success = token.transfer_from(caller, treasury, fee);
+                assert(success, 'Fee transfer failed');
+            }
+            
+            // Transfer net amount to merchant
+            let success = token.transfer_from(caller, merchant_address, net_amount);
+            assert(success, 'Payment transfer failed');
             
             self.emit(PaymentProcessed {
                 merchant: merchant_address,
@@ -149,6 +162,7 @@ mod SimplePaymentProcessor {
             self._nonreentrant_end();
         }
 
+        // ---- ADMIN FUNCTIONS ----
         fn whitelist_token(ref self: ContractState, token_address: ContractAddress, whitelisted: bool) {
             let caller = get_caller_address();
             assert(caller == self.owner.read(), 'Only owner can whitelist');
@@ -176,7 +190,7 @@ mod SimplePaymentProcessor {
             });
         }
 
-        // View functions
+        // ---- VIEWS ----
         fn is_merchant_registered(self: @ContractState, merchant_address: ContractAddress) -> bool {
             self.registered_merchants.read(merchant_address)
         }
