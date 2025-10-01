@@ -7,7 +7,8 @@ import { WalletConnect } from '@/components/WalletConnect';
 import { getPaymentDetails } from '@/lib/api';
 import { processPayment, approveToken, checkTokenAllowance, getTokenBalance, formatTokenAmount, parseTokenAmount, TOKENS } from '@/lib/contract';
 import { getConnectedWallet } from '@/lib/wallet';
-import { QrCode, CheckCircle, XCircle, Loader, ArrowLeft } from 'lucide-react';
+import { openAnyWallet, isMobileDevice } from '@/lib/walletDeepLink';
+import { QrCode, CheckCircle, XCircle, Loader, ArrowLeft, Wallet } from 'lucide-react';
 import Link from 'next/link';
 
 function PaymentContent() {
@@ -48,6 +49,20 @@ function PaymentContent() {
 
     fetchPaymentDetails();
   }, [paymentId]);
+
+  // Auto-trigger wallet connection on mobile when page loads
+  useEffect(() => {
+    const autoConnectWallet = () => {
+      if (isMobileDevice() && !isConnected && merchantAddress && tokenAddress && amount) {
+        // Try to open wallet app using deep links
+        openAnyWallet({ returnUrl: window.location.href });
+      }
+    };
+
+    // Delay to ensure page is loaded
+    const timer = setTimeout(autoConnectWallet, 1500);
+    return () => clearTimeout(timer);
+  }, [isConnected, merchantAddress, tokenAddress, amount]);
 
   useEffect(() => {
     const fetchBalance = async () => {
@@ -244,9 +259,23 @@ function PaymentContent() {
           </div>
 
           {!isConnected ? (
-            <div className="text-center">
+            <div className="text-center space-y-3">
               <p className="text-gray-600 mb-4">Connect your wallet to proceed with payment</p>
               <WalletConnect />
+              {isMobileDevice() && (
+                <>
+                  <button
+                    onClick={() => openAnyWallet({ returnUrl: window.location.href })}
+                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 shadow-md"
+                  >
+                    <Wallet className="h-5 w-5" />
+                    Open Wallet App
+                  </button>
+                  <p className="text-xs text-gray-500">
+                    Tap "Open Wallet App" to launch your Starknet wallet (ArgentX or Braavos)
+                  </p>
+                </>
+              )}
             </div>
           ) : (
             <button
