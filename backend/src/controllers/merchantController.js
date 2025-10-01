@@ -6,6 +6,9 @@ const { generatePaymentId, createPaymentUrl, generateQRCode } = require('../serv
 // Register merchant
 exports.registerMerchant = async (req, res) => {
   try {
+    console.log('[registerMerchant] Request from:', req.get('origin'));
+    console.log('[registerMerchant] Full URL:', `${req.protocol}://${req.get('host')}${req.originalUrl}`);
+
     const { address, name, description, email } = req.body;
 
     if (!address || !name) {
@@ -15,6 +18,8 @@ exports.registerMerchant = async (req, res) => {
       });
     }
 
+    console.log("Registering merchant with address:", address);
+
     // Check if merchant already exists
     const existingMerchant = await Merchant.findOne({ address: address.toLowerCase() });
     if (existingMerchant) {
@@ -23,6 +28,8 @@ exports.registerMerchant = async (req, res) => {
         message: 'Merchant already registered',
       });
     }
+
+    console.log("Creating new merchant entry");
 
     const merchant = new Merchant({
       address: address.toLowerCase(),
@@ -45,12 +52,16 @@ exports.registerMerchant = async (req, res) => {
       message: 'Failed to register merchant',
       error: error.message,
     });
+    console.log("Error details:", error);
   }
 };
 
 // Get merchant details
 exports.getMerchant = async (req, res) => {
   try {
+    console.log('[getMerchant] Request from:', req.get('origin'));
+    console.log('[getMerchant] Full URL:', `${req.protocol}://${req.get('host')}${req.originalUrl}`);
+
     const { address } = req.params;
 
     const merchant = await Merchant.findOne({ address: address.toLowerCase() });
@@ -82,6 +93,9 @@ exports.getMerchant = async (req, res) => {
 // Generate QR code for payment
 exports.generateQR = async (req, res) => {
   try {
+    console.log('[generateQR] Request from:', req.get('origin'));
+    console.log('[generateQR] Full URL:', `${req.protocol}://${req.get('host')}${req.originalUrl}`);
+
     const { address } = req.params;
     const { tokenAddress, amount, description } = req.body;
 
@@ -91,6 +105,8 @@ exports.generateQR = async (req, res) => {
         message: 'Token address and amount are required',
       });
     }
+    console.log("Generating QR for merchant address:", address);
+    console.log("Token address:", tokenAddress);
 
     // Verify merchant exists
     const merchant = await Merchant.findOne({ address: address.toLowerCase() });
@@ -138,6 +154,9 @@ exports.generateQR = async (req, res) => {
 // Get merchant transactions
 exports.getMerchantTransactions = async (req, res) => {
   try {
+    console.log('[getMerchantTransactions] Request from:', req.get('origin'));
+    console.log('[getMerchantTransactions] Full URL:', `${req.protocol}://${req.get('host')}${req.originalUrl}`);
+
     const { address } = req.params;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -147,6 +166,9 @@ exports.getMerchantTransactions = async (req, res) => {
       .sort({ timestamp: -1 })
       .skip(skip)
       .limit(limit);
+
+      console.log("Fetched transactions for merchant address:", address);
+      console.log("Total transactions:", transactions.length);
 
     const total = await Transaction.countDocuments({ merchantAddress: address.toLowerCase() });
 

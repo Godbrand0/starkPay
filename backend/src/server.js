@@ -10,6 +10,9 @@ const paymentRoutes = require('./routes/payment');
 const app = express();
 const PORT = process.env.PORT || 3004;
 
+console.log('Starting server...');
+console.log("i'm using the frontend url, ",process.env.CORS_ORIGIN)
+
 // Connect to MongoDB
 connectDB();
 
@@ -22,11 +25,23 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Request logging
+// Request logging with full URL details
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.path}`);
+  console.log('\n========== INCOMING REQUEST ==========');
+  console.log(`Method: ${req.method}`);
+  console.log(`Path: ${req.path}`);
+  console.log(`Full URL: ${req.protocol}://${req.get('host')}${req.originalUrl}`);
+  console.log(`Origin: ${req.get('origin') || 'Not set'}`);
+  console.log(`Referer: ${req.get('referer') || 'Not set'}`);
+  console.log(`User-Agent: ${req.get('user-agent') || 'Not set'}`);
+  console.log(`IP: ${req.ip}`);
+  console.log(`Body:`, req.body);
+  console.log(`Query:`, req.query);
+  console.log('======================================\n');
   next();
 });
+console.log("i'm using the frontend url, ",process.env.CORS_ORIGIN)
+
 
 // Health check
 app.get('/health', (req, res) => {
@@ -34,8 +49,12 @@ app.get('/health', (req, res) => {
 });
 
 // Routes
+console.log("i'm using the frontend url, ",process.env.CORS_ORIGIN)
 app.use('/api/merchant', merchantRoutes);
+console.log("i'm using the frontend url, ",process.env.CORS_ORIGIN)
 app.use('/api/payment', paymentRoutes);
+console.log("i'm using the frontend url, ",process.env.CORS_ORIGIN)
+
 
 // 404 handler
 app.use((req, res) => {
