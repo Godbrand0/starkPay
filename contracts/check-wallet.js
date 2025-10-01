@@ -15,7 +15,7 @@ async function checkWallet() {
   const walletAddress = process.env.DEPLOYER_ADDRESS;
 
   if (!walletAddress) {
-    console.error("❌ DEPLOYER_ADDRESS not found in .env file");
+    console.error(" DEPLOYER_ADDRESS not found in .env file");
     process.exit(1);
   }
 
