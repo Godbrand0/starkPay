@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAppSelector } from '@/store/hooks';
 import { WalletConnect } from '@/components/WalletConnect';
-import { getPaymentDetails } from '@/lib/api';
+import { getPaymentDetails, verifyTransaction } from '@/lib/api';
 import { processPayment, approveToken, checkTokenAllowance, getTokenBalance, formatTokenAmount, parseTokenAmount, TOKENS } from '@/lib/contract';
 import { getConnectedWallet } from '@/lib/wallet';
 import { openAnyWallet, isMobileDevice } from '@/lib/walletDeepLink';
@@ -122,6 +122,16 @@ function PaymentContent() {
       setPaymentStatus('paying');
       const hash = await processPayment(wallet.account, merchantAddress, tokenAddress, amountBigInt);
       console.log('Payment successful! Transaction hash:', hash);
+
+      // Verify transaction on backend to update merchant dashboard
+      try {
+        console.log('Verifying transaction on backend...');
+        await verifyTransaction(hash);
+        console.log('Transaction verified and recorded on backend');
+      } catch (verifyError) {
+        console.error('Failed to verify transaction on backend (payment still successful):', verifyError);
+        // Don't fail the payment if backend verification fails
+      }
 
       setTxHash(hash);
       setPaymentStatus('success');

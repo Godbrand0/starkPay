@@ -71,18 +71,50 @@ exports.verifyTransaction = async (req, res) => {
     const details = await getTransactionDetails(transactionHash);
 
     // Parse transaction events to extract payment details
-    // Note: This is a simplified version. In production, you'd parse the actual events
     const receipt = details.receipt;
+    const events = receipt.events || [];
+
+    console.log('Transaction events:', JSON.stringify(events, null, 2));
+
+    // Find PaymentProcessed event
+    const paymentEvent = events.find(event => {
+      // Event keys contain the event selector hash
+      // PaymentProcessed event has merchant, payer, token, gross_amount, net_amount, fee_amount
+      return event.keys && event.keys.length > 0;
+    });
+
+    let merchantAddress = '0x0';
+    let payerAddress = '0x0';
+    let tokenAddress = '0x0';
+    let grossAmount = '0';
+    let netAmount = '0';
+    let feeAmount = '0';
+
+    if (paymentEvent && paymentEvent.data && paymentEvent.data.length >= 6) {
+      // Event data structure: [merchant, payer, token, gross_amount_low, gross_amount_high, net_amount_low, net_amount_high, fee_amount_low, fee_amount_high]
+      merchantAddress = paymentEvent.data[0];
+      payerAddress = paymentEvent.data[1];
+      tokenAddress = paymentEvent.data[2];
+
+      // Convert u256 (low, high) to string
+      const grossAmountBigInt = BigInt(paymentEvent.data[3]) + (BigInt(paymentEvent.data[4] || 0) << 128n);
+      const netAmountBigInt = BigInt(paymentEvent.data[5] || 0) + (BigInt(paymentEvent.data[6] || 0) << 128n);
+      const feeAmountBigInt = BigInt(paymentEvent.data[7] || 0) + (BigInt(paymentEvent.data[8] || 0) << 128n);
+
+      grossAmount = grossAmountBigInt.toString();
+      netAmount = netAmountBigInt.toString();
+      feeAmount = feeAmountBigInt.toString();
+    }
 
     // Create transaction record
     transaction = new Transaction({
       transactionHash,
-      merchantAddress: '0x0', // Extract from events
-      payerAddress: '0x0', // Extract from events
-      tokenAddress: '0x0', // Extract from events
-      grossAmount: '0',
-      netAmount: '0',
-      feeAmount: '0',
+      merchantAddress: merchantAddress.toLowerCase(),
+      payerAddress: payerAddress.toLowerCase(),
+      tokenAddress: tokenAddress.toLowerCase(),
+      grossAmount,
+      netAmount,
+      feeAmount,
       status: 'completed',
       blockNumber: details.blockNumber,
       timestamp: new Date(),
@@ -91,7 +123,15 @@ exports.verifyTransaction = async (req, res) => {
     await transaction.save();
 
     // Update merchant stats
-    // await updateMerchantStats(transaction.merchantAddress, transaction.netAmount);
+    if (merchantAddress !== '0x0' && netAmount !== '0') {
+      const merchant = await Merchant.findOne({ address: merchantAddress.toLowerCase() });
+      if (merchant) {
+        merchant.totalEarnings = (BigInt(merchant.totalEarnings || 0) + BigInt(netAmount)).toString();
+        merchant.transactionCount = (merchant.transactionCount || 0) + 1;
+        await merchant.save();
+        console.log('Updated merchant stats:', merchant.address, 'Total earnings:', merchant.totalEarnings);
+      }
+    }
 
     res.json({
       success: true,
