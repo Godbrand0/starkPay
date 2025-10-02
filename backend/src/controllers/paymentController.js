@@ -131,6 +131,25 @@ exports.verifyTransaction = async (req, res) => {
         await merchant.save();
         console.log('Updated merchant stats:', merchant.address, 'Total earnings:', merchant.totalEarnings);
       }
+
+      // Try to find and update matching Payment record
+      // Convert grossAmount from Wei to human-readable (divide by 10^18)
+      const grossAmountDecimal = (BigInt(grossAmount) / BigInt(10 ** 18)).toString();
+
+      const matchingPayment = await Payment.findOne({
+        merchantAddress: merchantAddress.toLowerCase(),
+        tokenAddress: tokenAddress.toLowerCase(),
+        amount: grossAmountDecimal,
+        status: 'pending'
+      }).sort({ createdAt: -1 }); // Get the most recent matching payment
+
+      if (matchingPayment) {
+        matchingPayment.status = 'completed';
+        await matchingPayment.save();
+        console.log('Updated payment status to completed:', matchingPayment.paymentId);
+      } else {
+        console.log('No matching pending payment found for this transaction');
+      }
     }
 
     res.json({

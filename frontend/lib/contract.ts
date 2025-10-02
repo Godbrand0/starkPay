@@ -162,12 +162,23 @@ export const getTokenBalance = async (tokenAddress: string, accountAddress: stri
   }
 };
 
-export const formatTokenAmount = (amount: bigint, decimals: number = 6): string => {
+export const formatTokenAmount = (amount: bigint, decimals: number = 6, maxDecimals: number = 6): string => {
   const divisor = BigInt(10 ** decimals);
   const integerPart = amount / divisor;
   const fractionalPart = amount % divisor;
   const fractionalStr = fractionalPart.toString().padStart(decimals, '0');
-  return `${integerPart}.${fractionalStr}`;
+
+  // Trim trailing zeros and limit decimal places
+  let trimmedFractional = fractionalStr.replace(/0+$/, '');
+  if (trimmedFractional.length > maxDecimals) {
+    trimmedFractional = trimmedFractional.slice(0, maxDecimals);
+  }
+
+  if (trimmedFractional.length === 0) {
+    return integerPart.toString();
+  }
+
+  return `${integerPart}.${trimmedFractional}`;
 };
 
 export const parseTokenAmount = (amount: string, decimals: number = 6): bigint => {

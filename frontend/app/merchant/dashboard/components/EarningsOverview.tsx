@@ -13,12 +13,12 @@ export function EarningsOverview({ merchantData }: EarningsOverviewProps) {
 
   // Convert totalEarnings string to BigInt for formatting
   const totalEarningsBigInt = BigInt(totalEarnings);
-  const formattedEarnings = formatTokenAmount(totalEarningsBigInt, 18);
+  const formattedEarnings = formatTokenAmount(totalEarningsBigInt, 18, 4);
 
   // Calculate average
   const averageEarnings = transactionCount > 0
-    ? formatTokenAmount(totalEarningsBigInt / BigInt(transactionCount), 18)
-    : '0.000000000000000000';
+    ? formatTokenAmount(totalEarningsBigInt / BigInt(transactionCount), 18, 4)
+    : '0';
 
   return (
     <div className="grid md:grid-cols-3 gap-6">

@@ -121,13 +121,13 @@ export function TransactionList({ merchantAddress }: TransactionListProps) {
                 <div>
                   <p className="text-gray-500">Net Amount</p>
                   <p className="font-semibold text-green-600">
-                    {formatTokenAmount(BigInt(tx.netAmount), 18)} STRK
+                    {formatTokenAmount(BigInt(tx.netAmount), 18, 4)} STRK
                   </p>
                 </div>
                 <div>
                   <p className="text-gray-500">Fee</p>
                   <p className="font-medium text-gray-700">
-                    {formatTokenAmount(BigInt(tx.feeAmount), 18)} STRK
+                    {formatTokenAmount(BigInt(tx.feeAmount), 18, 4)} STRK
                   </p>
                 </div>
                 <div>
