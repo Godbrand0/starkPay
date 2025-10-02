@@ -75,7 +75,7 @@ export function QRGenerator({ merchantAddress }: QRGeneratorProps) {
             onChange={(e) => setTokenAddress(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
-            <option value={TOKENS.STRK.address}>{TOKENS.STRK.symbol} - {TOKENS.STRK.name}</option>
+            <option className='text-black' value={TOKENS.STRK.address}>{TOKENS.STRK.symbol} - {TOKENS.STRK.name}</option>
           </select>
         </div>
 
@@ -90,7 +90,7 @@ export function QRGenerator({ merchantAddress }: QRGeneratorProps) {
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             placeholder="0.00"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-black  focus:border-transparent"
             required
           />
         </div>
@@ -104,7 +104,7 @@ export function QRGenerator({ merchantAddress }: QRGeneratorProps) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Payment for..."
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 text-black rounded-lg focus:border-transparent"
           />
         </div>
 
@@ -162,3 +162,4 @@ export function QRGenerator({ merchantAddress }: QRGeneratorProps) {
     </div>
   );
 }
+0x0693a1b59ab67b6441eb72bf20750737056a3dee52755564fd51e5180eb3dc09
