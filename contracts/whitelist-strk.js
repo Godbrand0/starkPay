@@ -1,4 +1,4 @@
-// whitelist-eth.js - Whitelist ETH token in PaymentProcessor
+// whitelist-strk.js - Whitelist STRK token in PaymentProcessor
 import { RpcProvider, Account, Contract } from "starknet";
 import dotenv from "dotenv";
 import fs from "fs";
@@ -11,7 +11,7 @@ const provider = new RpcProvider({ nodeUrl: RPC_URL });
 const DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
 const DEPLOYER_ADDRESS = process.env.DEPLOYER_ADDRESS;
 const PAYMENT_PROCESSOR = "0x59a2afea28e769e8f59facda6c4a8019c5dcfb53adb1a8927b418bc6683dd31";
-const ETH_TOKEN = "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
+const STRK_TOKEN = "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d";
 
 const PAYMENT_PROCESSOR_ABI = JSON.parse(
   fs.readFileSync("../frontend/lib/abi.json", "utf8")
@@ -19,7 +19,7 @@ const PAYMENT_PROCESSOR_ABI = JSON.parse(
 
 async function main() {
   console.log("=".repeat(60));
-  console.log("Whitelist ETH Token for Payments");
+  console.log("Whitelist STRK Token for Payments");
   console.log("=".repeat(60));
 
   const account = new Account(provider, DEPLOYER_ADDRESS, DEPLOYER_PRIVATE_KEY, "1");
@@ -27,13 +27,13 @@ async function main() {
 
   console.log("\n📋 Configuration:");
   console.log(`  Payment Processor: ${PAYMENT_PROCESSOR}`);
-  console.log(`  ETH Token: ${ETH_TOKEN}`);
+  console.log(`  STRK Token: ${STRK_TOKEN}`);
   console.log(`  Owner: ${DEPLOYER_ADDRESS}`);
 
-  // Whitelist ETH
-  console.log("\n🪙 Whitelisting ETH token...");
+  // Whitelist STRK
+  console.log("\n🪙 Whitelisting STRK token...");
   try {
-    const tx = await contract.whitelist_token(ETH_TOKEN, true);
+    const tx = await contract.whitelist_token(STRK_TOKEN, true);
     console.log(`  Transaction Hash: ${tx.transaction_hash}`);
     console.log("  ⏳ Waiting for confirmation...");
 
@@ -42,10 +42,10 @@ async function main() {
       successStates: ["ACCEPTED_ON_L2", "ACCEPTED_ON_L1"]
     });
 
-    console.log("  ✅ ETH token whitelisted successfully!");
+    console.log("  ✅ STRK token whitelisted successfully!");
 
     // Verify
-    const isWhitelisted = await contract.is_token_whitelisted(ETH_TOKEN);
+    const isWhitelisted = await contract.is_token_whitelisted(STRK_TOKEN);
     console.log(`  Verification: ${isWhitelisted ? "✅ Whitelisted" : "❌ Not whitelisted"}`);
 
   } catch (error) {
@@ -54,15 +54,20 @@ async function main() {
   }
 
   console.log("\n" + "=".repeat(60));
-  console.log("✅ ETH WHITELISTING COMPLETE!");
+  console.log("✅ STRK WHITELISTING COMPLETE!");
   console.log("=".repeat(60));
   console.log("\n📋 Next Steps:");
-  console.log("  1. Update backend .env with ETH addresses");
-  console.log("  2. Update frontend .env with ETH addresses");
-  console.log("  3. Remove BuyTokensModal from frontend");
-  console.log("  4. Test ETH payment flow");
+  console.log("  1. Update backend .env with STRK address");
+  console.log("  2. Update frontend .env with STRK address");
+  console.log("  3. Update token labels to show 'STRK'");
+  console.log("  4. Get STRK from faucet: https://starknet-faucet.vercel.app/");
+  console.log("  5. Test STRK payment flow");
   console.log("\n🔗 View on Starkscan:");
   console.log(`  https://sepolia.starkscan.co/contract/${PAYMENT_PROCESSOR}`);
+  console.log("\n💡 STRK Token Info:");
+  console.log(`  Address: ${STRK_TOKEN}`);
+  console.log(`  Decimals: 18`);
+  console.log(`  Faucet: https://starknet-faucet.vercel.app/`);
   console.log("\n" + "=".repeat(60));
 }
 

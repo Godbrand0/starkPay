@@ -129,8 +129,7 @@ function PaymentContent() {
   };
 
   const getTokenSymbol = (addr: string) => {
-    if (addr === TOKENS.USDC.address) return TOKENS.USDC.symbol;
-    if (addr === TOKENS.USDT.address) return TOKENS.USDT.symbol;
+    if (addr === TOKENS.STRK.address) return TOKENS.STRK.symbol;
     return 'TOKEN';
   };
 

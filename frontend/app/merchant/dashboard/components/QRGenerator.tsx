@@ -10,7 +10,7 @@ interface QRGeneratorProps {
 }
 
 export function QRGenerator({ merchantAddress }: QRGeneratorProps) {
-  const [tokenAddress, setTokenAddress] = useState(TOKENS.USDC.address);
+  const [tokenAddress, setTokenAddress] = useState(TOKENS.STRK.address);
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [qrData, setQrData] = useState<any>(null);
@@ -75,8 +75,7 @@ export function QRGenerator({ merchantAddress }: QRGeneratorProps) {
             onChange={(e) => setTokenAddress(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
-            <option value={TOKENS.USDC.address}>{TOKENS.USDC.symbol} - {TOKENS.USDC.name}</option>
-            <option value={TOKENS.USDT.address}>{TOKENS.USDT.symbol} - {TOKENS.USDT.name}</option>
+            <option value={TOKENS.STRK.address}>{TOKENS.STRK.symbol} - {TOKENS.STRK.name}</option>
           </select>
         </div>
 

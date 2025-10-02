@@ -178,7 +178,7 @@ export const parseTokenAmount = (amount: string, decimals: number = 6): bigint =
 };
 
 // Starknet ETH token address (Sepolia)
-const ETH_TOKEN_ADDRESS = "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
+const STARK_SEPOLIA_ADDRESS = "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d";
 
 export const buyTokensWithETH = async (
   account: AccountInterface,
@@ -188,7 +188,7 @@ export const buyTokensWithETH = async (
 ) => {
   try {
     // First approve ETH spending
-    const ethToken = getTokenContract(ETH_TOKEN_ADDRESS, account);
+    const ethToken = getTokenContract(STARK_SEPOLIA_ADDRESS, account);
     const approveCall = ethToken.populate("approve", [
       PAYMENT_PROCESSOR_ADDRESS,
       cairo.uint256(ethAmount)
@@ -224,7 +224,7 @@ export const getTokenPrice = async (tokenAddress: string): Promise<bigint> => {
 
 export const getETHBalance = async (address: string): Promise<bigint> => {
   try {
-    const ethToken = getTokenContract(ETH_TOKEN_ADDRESS);
+    const ethToken = getTokenContract(STARK_SEPOLIA_ADDRESS);
     const balance = await ethToken.balanceOf(address);
     return BigInt(balance.toString());
   } catch (error) {
@@ -234,22 +234,11 @@ export const getETHBalance = async (address: string): Promise<bigint> => {
 };
 
 export const TOKENS = {
-  USDC: {
-    address: MOCK_USDC_ADDRESS,
-    symbol: "ETH",
-    name: "Ethereum",
-    decimals: 18,
-  },
-  USDT: {
-    address: MOCK_USDT_ADDRESS,
-    symbol: "ETH",
-    name: "Ethereum",
-    decimals: 18,
-  },
-  ETH: {
-    address: ETH_TOKEN_ADDRESS,
-    symbol: "ETH",
-    name: "Ethereum",
+  
+  STRK: {
+    address: STARK_SEPOLIA_ADDRESS,
+    symbol: "STK",
+    name: "Starknet",
     decimals: 18,
   },
 };
