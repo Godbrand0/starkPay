@@ -105,17 +105,23 @@ function PaymentContent() {
       const paymentProcessorAddress = process.env.NEXT_PUBLIC_PAYMENT_PROCESSOR_ADDRESS!;
 
       // Check allowance
-      setPaymentStatus('approving');
+      console.log('Checking token allowance...');
       const allowance = await checkTokenAllowance(tokenAddress, address, paymentProcessorAddress);
+      console.log('Current allowance:', allowance.toString(), 'Required:', amountBigInt.toString());
 
       if (allowance < amountBigInt) {
         // Need to approve
-        await approveToken(wallet.account, tokenAddress, paymentProcessorAddress, amountBigInt);
+        console.log('Approving token...');
+        setPaymentStatus('approving');
+        const approveTxHash = await approveToken(wallet.account, tokenAddress, paymentProcessorAddress, amountBigInt);
+        console.log('Token approved! Transaction hash:', approveTxHash);
       }
 
       // Process payment
+      console.log('Processing payment...');
       setPaymentStatus('paying');
       const hash = await processPayment(wallet.account, merchantAddress, tokenAddress, amountBigInt);
+      console.log('Payment successful! Transaction hash:', hash);
 
       setTxHash(hash);
       setPaymentStatus('success');

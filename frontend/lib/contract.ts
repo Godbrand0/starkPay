@@ -234,11 +234,10 @@ export const getETHBalance = async (address: string): Promise<bigint> => {
 };
 
 export const TOKENS = {
-  
   STRK: {
     address: STARK_SEPOLIA_ADDRESS,
-    symbol: "STK",
-    name: "Starknet",
+    symbol: "STRK",
+    name: "Starknet Token",
     decimals: 18,
   },
 };
