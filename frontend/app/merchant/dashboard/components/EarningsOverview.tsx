@@ -1,15 +1,24 @@
 'use client';
 
 import { DollarSign, TrendingUp, ShoppingBag } from 'lucide-react';
+import { formatTokenAmount } from '@/lib/contract';
 
 interface EarningsOverviewProps {
-  merchantAddress: string;
   merchantData: any;
 }
 
-export function EarningsOverview({ merchantAddress, merchantData }: EarningsOverviewProps) {
-  const totalEarnings = merchantData?.stats?.totalEarnings || 0;
+export function EarningsOverview({ merchantData }: EarningsOverviewProps) {
+  const totalEarnings = merchantData?.stats?.totalEarnings || '0';
   const transactionCount = merchantData?.stats?.transactionCount || 0;
+
+  // Convert totalEarnings string to BigInt for formatting
+  const totalEarningsBigInt = BigInt(totalEarnings);
+  const formattedEarnings = formatTokenAmount(totalEarningsBigInt, 18);
+
+  // Calculate average
+  const averageEarnings = transactionCount > 0
+    ? formatTokenAmount(totalEarningsBigInt / BigInt(transactionCount), 18)
+    : '0.000000000000000000';
 
   return (
     <div className="grid md:grid-cols-3 gap-6">
@@ -21,7 +30,7 @@ export function EarningsOverview({ merchantAddress, merchantData }: EarningsOver
         </div>
         <h3 className="text-gray-500 text-sm font-medium">Total Earnings</h3>
         <p className="text-3xl font-bold text-gray-900 mt-1">
-          ${totalEarnings.toFixed(2)}
+          {formattedEarnings} <span className="text-xl text-gray-600">STRK</span>
         </p>
       </div>
 
@@ -43,7 +52,7 @@ export function EarningsOverview({ merchantAddress, merchantData }: EarningsOver
         </div>
         <h3 className="text-gray-500 text-sm font-medium">Average Transaction</h3>
         <p className="text-3xl font-bold text-gray-900 mt-1">
-          ${transactionCount > 0 ? (totalEarnings / transactionCount).toFixed(2) : '0.00'}
+          {averageEarnings} <span className="text-xl text-gray-600">STRK</span>
         </p>
       </div>
     </div>

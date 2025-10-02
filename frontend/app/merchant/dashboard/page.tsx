@@ -138,7 +138,7 @@ export default function MerchantDashboard() {
           </p>
         </div>
 
-        <EarningsOverview merchantAddress={address!} merchantData={merchantData} />
+        <EarningsOverview merchantData={merchantData} />
 
         <div className="grid lg:grid-cols-2 gap-8 mt-8">
           <QRGenerator merchantAddress={address!} />
