@@ -10,6 +10,7 @@ const paymentSchema = new mongoose.Schema({
   merchantAddress: {
     type: String,
     required: true,
+    index: true,
   },
   tokenAddress: {
     type: String,
@@ -30,8 +31,31 @@ const paymentSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'completed', 'expired'],
+    enum: ['pending', 'processing', 'completed', 'failed', 'expired'],
     default: 'pending',
+  },
+  // Transaction details (filled when payment is completed)
+  transactionHash: {
+    type: String,
+    sparse: true, // Allow multiple null values
+  },
+  payerAddress: {
+    type: String,
+  },
+  grossAmount: {
+    type: String,
+  },
+  netAmount: {
+    type: String,
+  },
+  feeAmount: {
+    type: String,
+  },
+  blockNumber: {
+    type: Number,
+  },
+  completedAt: {
+    type: Date,
   },
   expiresAt: {
     type: Date,

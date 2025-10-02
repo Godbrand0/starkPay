@@ -1,7 +1,7 @@
 const Merchant = require('../models/Merchant');
 const Payment = require('../models/Payment');
-const Transaction = require('../models/Transaction');
 const { generatePaymentId, createPaymentUrl, generateQRCode } = require('../services/qrService');
+const { normalizeAddress } = require('../services/contractService');
 
 // Register merchant
 exports.registerMerchant = async (req, res) => {
@@ -151,7 +151,7 @@ exports.generateQR = async (req, res) => {
   }
 };
 
-// Get merchant transactions
+// Get merchant transactions (completed payments)
 exports.getMerchantTransactions = async (req, res) => {
   try {
     console.log('[getMerchantTransactions] Request from:', req.get('origin'));
@@ -162,17 +162,27 @@ exports.getMerchantTransactions = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const transactions = await Transaction.find({ merchantAddress: address.toLowerCase() })
-      .sort({ timestamp: -1 })
+    const normalizedAddress = normalizeAddress(address);
+
+    // Fetch only completed payments (which are the transactions)
+    const transactions = await Payment.find({
+      merchantAddress: normalizedAddress,
+      status: 'completed'
+    })
+      .sort({ completedAt: -1 })
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .select('transactionHash payerAddress tokenAddress grossAmount netAmount feeAmount blockNumber completedAt amount description');
 
-      console.log("Fetched transactions for merchant address:", address);
-      console.log("Total transactions:", transactions.length);
+    console.log("Fetched transactions for merchant address:", normalizedAddress);
+    console.log("Total transactions:", transactions.length);
 
-    const total = await Transaction.countDocuments({ merchantAddress: address.toLowerCase() });
+    const total = await Payment.countDocuments({
+      merchantAddress: normalizedAddress,
+      status: 'completed'
+    });
 
-    const merchant = await Merchant.findOne({ address: address.toLowerCase() });
+    const merchant = await Merchant.findOne({ address: normalizedAddress });
 
     res.json({
       success: true,
@@ -195,22 +205,24 @@ exports.getMerchantTransactions = async (req, res) => {
   }
 };
 
-// Get merchant payments (for tracking)
+// Get merchant payments (all payments including pending - for tracking)
 exports.getMerchantPayments = async (req, res) => {
   try {
     console.log('[getMerchantPayments] Request from:', req.get('origin'));
     console.log('[getMerchantPayments] Full URL:', `${req.protocol}://${req.get('host')}${req.originalUrl}`);
 
     const { address } = req.params;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 20;
+
+    const normalizedAddress = normalizeAddress(address);
 
     // Fetch recent payments for this merchant, ordered by most recent
-    const payments = await Payment.find({ merchantAddress: address.toLowerCase() })
+    const payments = await Payment.find({ merchantAddress: normalizedAddress })
       .sort({ createdAt: -1 })
       .limit(limit)
-      .select('paymentId amount tokenAddress status description createdAt');
+      .select('paymentId amount tokenAddress status description createdAt completedAt transactionHash payerAddress netAmount feeAmount');
 
-    console.log("Fetched payments for merchant address:", address);
+    console.log("Fetched payments for merchant address:", normalizedAddress);
     console.log("Total payments:", payments.length);
 
     res.json({

@@ -7,10 +7,9 @@ import { WalletConnect } from '@/components/WalletConnect';
 import { QRGenerator } from './components/QRGenerator';
 import { TransactionList } from './components/TransactionList';
 import { EarningsOverview } from './components/EarningsOverview';
-import { PaymentTracker } from './components/PaymentTracker';
 import { checkMerchantRegistration } from '@/lib/contract';
 import { getMerchant } from '@/lib/api';
-import { ArrowLeft, QrCode, Activity } from 'lucide-react';
+import { ArrowLeft, QrCode } from 'lucide-react';
 import Link from 'next/link';
 
 export default function MerchantDashboard() {
@@ -19,7 +18,6 @@ export default function MerchantDashboard() {
   const [isRegistered, setIsRegistered] = useState(false);
   const [merchantData, setMerchantData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showPaymentTracker, setShowPaymentTracker] = useState(false);
 
   useEffect(() => {
     const checkRegistration = async () => {
@@ -133,20 +131,14 @@ export default function MerchantDashboard() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8 flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Welcome back!</h1>
-            <p className="text-gray-600 mt-1">
-              {merchantData?.merchant?.name || 'Merchant'}
-            </p>
-          </div>
-          <button
-            onClick={() => setShowPaymentTracker(true)}
-            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 shadow-lg transition-all hover:shadow-xl"
-          >
-            <Activity className="h-5 w-5 animate-pulse" />
-            Track Payments
-          </button>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Welcome back!</h1>
+          <p className="text-gray-600 mt-1">
+            {merchantData?.merchant?.name || 'Merchant'}
+          </p>
+          <p className="text-sm text-gray-500 mt-2">
+            💡 Payments update in real-time - watch for pending payments turning green!
+          </p>
         </div>
 
         <EarningsOverview merchantData={merchantData} />
@@ -156,13 +148,6 @@ export default function MerchantDashboard() {
           <TransactionList merchantAddress={address!} />
         </div>
       </main>
-
-      {/* Payment Tracker Modal */}
-      <PaymentTracker
-        merchantAddress={address!}
-        isOpen={showPaymentTracker}
-        onClose={() => setShowPaymentTracker(false)}
-      />
     </div>
   );
 }

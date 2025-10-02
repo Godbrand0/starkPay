@@ -70,7 +70,7 @@ export function PaymentTracker({ merchantAddress, isOpen, onClose }: PaymentTrac
       );
 
       setRecentPayments(updatedPayments);
-    }, 3000); // Poll every 3 seconds
+    }, 10000); // Poll every 3 seconds
 
     return () => clearInterval(interval);
   }, [isOpen, recentPayments]);
