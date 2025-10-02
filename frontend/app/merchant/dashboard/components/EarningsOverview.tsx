@@ -2,22 +2,16 @@
 
 import { DollarSign, TrendingUp, ShoppingBag } from 'lucide-react';
 import { formatTokenAmount } from '@/lib/contract';
+import { usePayments } from '@/contexts/PaymentsContext';
 
-interface EarningsOverviewProps {
-  merchantData: any;
-}
+export function EarningsOverview() {
+  const { totalEarnings, transactionCount } = usePayments();
 
-export function EarningsOverview({ merchantData }: EarningsOverviewProps) {
-  const totalEarnings = merchantData?.stats?.totalEarnings || '0';
-  const transactionCount = merchantData?.stats?.transactionCount || 0;
-
-  // Convert totalEarnings string to BigInt for formatting
-  const totalEarningsBigInt = BigInt(totalEarnings);
-  const formattedEarnings = formatTokenAmount(totalEarningsBigInt, 18, 4);
+  const formattedEarnings = formatTokenAmount(totalEarnings, 18, 4);
 
   // Calculate average
   const averageEarnings = transactionCount > 0
-    ? formatTokenAmount(totalEarningsBigInt / BigInt(transactionCount), 18, 4)
+    ? formatTokenAmount(totalEarnings / BigInt(transactionCount), 18, 4)
     : '0';
 
   return (

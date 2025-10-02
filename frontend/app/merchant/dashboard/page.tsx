@@ -7,6 +7,7 @@ import { WalletConnect } from '@/components/WalletConnect';
 import { QRGenerator } from './components/QRGenerator';
 import { TransactionList } from './components/TransactionList';
 import { EarningsOverview } from './components/EarningsOverview';
+import { PaymentsProvider } from '@/contexts/PaymentsContext';
 import { checkMerchantRegistration } from '@/lib/contract';
 import { getMerchant } from '@/lib/api';
 import { ArrowLeft, QrCode } from 'lucide-react';
@@ -131,22 +132,24 @@ export default function MerchantDashboard() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Welcome back!</h1>
-          <p className="text-gray-600 mt-1">
-            {merchantData?.merchant?.name || 'Merchant'}
-          </p>
-          <p className="text-sm text-gray-500 mt-2">
-            💡 Payments update in real-time - watch for pending payments turning green!
-          </p>
-        </div>
+        <PaymentsProvider merchantAddress={address!} autoRefreshInterval={5000}>
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Welcome back!</h1>
+            <p className="text-gray-600 mt-1">
+              {merchantData?.merchant?.name || 'Merchant'}
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              💡 Payments update in real-time - watch for pending payments turning green!
+            </p>
+          </div>
 
-        <EarningsOverview merchantData={merchantData} />
+          <EarningsOverview />
 
-        <div className="grid lg:grid-cols-2 gap-8 mt-8">
-          <QRGenerator merchantAddress={address!} />
-          <TransactionList merchantAddress={address!} />
-        </div>
+          <div className="grid lg:grid-cols-2 gap-8 mt-8">
+            <QRGenerator merchantAddress={address!} />
+            <TransactionList />
+          </div>
+        </PaymentsProvider>
       </main>
     </div>
   );

@@ -2,10 +2,12 @@ require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const cron = require('node-cron');
 const connectDB = require('./config/database');
 const errorHandler = require('./middleware/errorHandler');
 const merchantRoutes = require('./routes/merchant');
 const paymentRoutes = require('./routes/payment');
+const { checkPendingPayments } = require('./services/paymentVerificationService');
 
 const app = express();
 const PORT = process.env.PORT || 3004;
@@ -66,6 +68,17 @@ app.use((req, res) => {
 
 // Error handler
 app.use(errorHandler);
+
+// Start cron job for payment verification (every 30 seconds)
+cron.schedule('*/30 * * * * *', async () => {
+  try {
+    await checkPendingPayments();
+  } catch (error) {
+    console.error('Cron job error:', error);
+  }
+});
+
+console.log('⏰ Payment verification cron job started (runs every 30 seconds)');
 
 // Start server
 app.listen(PORT, () => {

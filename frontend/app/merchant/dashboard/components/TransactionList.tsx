@@ -1,53 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { getMerchantPayments } from '@/lib/api';
+import { useState } from 'react';
+import { usePayments } from '@/contexts/PaymentsContext';
 import { formatTokenAmount } from '@/lib/contract';
 import { History, ExternalLink, Copy, Check, Clock, CheckCircle, Loader } from 'lucide-react';
 
-interface Payment {
-  paymentId: string;
-  transactionHash?: string;
-  payerAddress?: string;
-  tokenAddress: string;
-  amount: string;
-  grossAmount?: string;
-  netAmount?: string;
-  feeAmount?: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed' | 'expired';
-  description?: string;
-  createdAt: string;
-  completedAt?: string;
-}
-
-interface TransactionListProps {
-  merchantAddress: string;
-}
-
-export function TransactionList({ merchantAddress }: TransactionListProps) {
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export function TransactionList() {
+  const { payments, isLoading } = usePayments();
   const [copiedHash, setCopiedHash] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchPayments = async () => {
-      try {
-        const data = await getMerchantPayments(merchantAddress, 20);
-        setPayments(data.payments || []);
-      } catch (error) {
-        console.error('Failed to fetch payments:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (merchantAddress) {
-      fetchPayments();
-      // Auto-refresh every 5 seconds to show real-time status updates
-      const interval = setInterval(fetchPayments, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [merchantAddress]);
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);

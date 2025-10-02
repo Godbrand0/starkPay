@@ -115,7 +115,7 @@ exports.verifyTransaction = async (req, res) => {
       console.log('  Gross Amount (Wei):', grossAmount);
       console.log('  Net Amount (Wei):', netAmount);
     } else {
-      console.log('   PaymentProcessed event not found');
+      console.log('ï¿½  PaymentProcessed event not found');
       return res.status(400).json({
         success: false,
         message: 'PaymentProcessed event not found in transaction',
@@ -177,7 +177,7 @@ exports.verifyTransaction = async (req, res) => {
 
     await payment.save();
 
-    // Update merchant stats
+    // Update merchant stats (merchantAddress is already normalized)
     const merchant = await Merchant.findOne({ address: merchantAddress });
     if (merchant) {
       merchant.totalEarnings = (BigInt(merchant.totalEarnings || 0) + BigInt(netAmount)).toString();
