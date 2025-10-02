@@ -14,4 +14,7 @@ router.post('/:address/qr', merchantController.generateQR);
 // GET /api/merchant/:address/transactions
 router.get('/:address/transactions', merchantController.getMerchantTransactions);
 
+// GET /api/merchant/:address/payments
+router.get('/:address/payments', merchantController.getMerchantPayments);
+
 module.exports = router;

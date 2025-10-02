@@ -195,4 +195,36 @@ exports.getMerchantTransactions = async (req, res) => {
   }
 };
 
+// Get merchant payments (for tracking)
+exports.getMerchantPayments = async (req, res) => {
+  try {
+    console.log('[getMerchantPayments] Request from:', req.get('origin'));
+    console.log('[getMerchantPayments] Full URL:', `${req.protocol}://${req.get('host')}${req.originalUrl}`);
+
+    const { address } = req.params;
+    const limit = parseInt(req.query.limit) || 10;
+
+    // Fetch recent payments for this merchant, ordered by most recent
+    const payments = await Payment.find({ merchantAddress: address.toLowerCase() })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .select('paymentId amount tokenAddress status description createdAt');
+
+    console.log("Fetched payments for merchant address:", address);
+    console.log("Total payments:", payments.length);
+
+    res.json({
+      success: true,
+      payments,
+    });
+  } catch (error) {
+    console.error('Error fetching payments:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch payments',
+      error: error.message,
+    });
+  }
+};
+
 module.exports = exports;

@@ -54,4 +54,11 @@ export const verifyTransaction = async (transactionHash: string) => {
   return response.data;
 };
 
+export const getMerchantPayments = async (address: string, limit: number = 10) => {
+  const response = await api.get(`/merchant/${address}/payments`, {
+    params: { limit },
+  });
+  return response.data;
+};
+
 export default api;
