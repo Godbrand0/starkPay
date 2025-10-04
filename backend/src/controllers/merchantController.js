@@ -121,11 +121,11 @@ exports.generateQR = async (req, res) => {
     const paymentUrl = createPaymentUrl(address, tokenAddress, amount, paymentId);
     const qrCode = await generateQRCode(paymentUrl);
 
-    // Save payment record
+    // Save payment record with normalized addresses
     const payment = new Payment({
       paymentId,
-      merchantAddress: address.toLowerCase(),
-      tokenAddress: tokenAddress.toLowerCase(),
+      merchantAddress: normalizeAddress(address),
+      tokenAddress: normalizeAddress(tokenAddress),
       amount,
       description,
       qrCode,
