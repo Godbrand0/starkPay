@@ -47,7 +47,7 @@ export function WalletConnect() {
   if (isConnected && address) {
     return (
       <div className="flex items-center gap-3">
-        <div className="bg-green-100 text-green-800 px-4 py-2 rounded-lg font-medium">
+        <div className="bg-green-100 text-green-800 hidden md:block px-4 py-2 rounded-lg font-medium">
           {shortenAddress(address)}
         </div>
         <button

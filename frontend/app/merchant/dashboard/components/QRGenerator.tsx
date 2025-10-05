@@ -92,28 +92,28 @@ export function QRGenerator({ merchantAddress }: QRGeneratorProps) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
       <div className="flex items-center mb-6">
-        <QrCode className="h-6 w-6 text-primary-600 mr-2" />
-        <h2 className="text-2xl font-bold text-gray-900">Generate QR Code</h2>
+        <QrCode className="h-6 w-6 text-primary-600 dark:text-primary-400 mr-2" />
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Generate QR Code</h2>
       </div>
 
       <form onSubmit={handleGenerate} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Token
           </label>
           <select
             value={tokenAddress}
             onChange={(e) => setTokenAddress(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-black focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
-            <option className='text-black' value={TOKENS.STRK.address}>{TOKENS.STRK.symbol} - {TOKENS.STRK.name}</option>
+            <option value={TOKENS.STRK.address}>{TOKENS.STRK.symbol} - {TOKENS.STRK.name}</option>
           </select>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Amount
           </label>
           <input
@@ -123,13 +123,13 @@ export function QRGenerator({ merchantAddress }: QRGeneratorProps) {
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             placeholder="0.00"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-black  focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Description (Optional)
           </label>
           <input
@@ -137,21 +137,21 @@ export function QRGenerator({ merchantAddress }: QRGeneratorProps) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Payment for..."
-            className="w-full px-4 py-2 border border-gray-300 text-black rounded-lg focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           />
         </div>
 
         <button
           type="submit"
           disabled={isGenerating}
-          className="w-full bg-primary-600 hover:bg-primary-700 text-white py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isGenerating ? 'Generating...' : 'Generate QR Code'}
         </button>
       </form>
 
       {qrData && (
-        <div className="mt-6 pt-6 border-t border-gray-200">
+        <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
           <div className="text-center">
             {/* Countdown Timer */}
             {paymentDetails?.expiresAt && !paymentDetails?.isCompleted && (
@@ -170,8 +170,8 @@ export function QRGenerator({ merchantAddress }: QRGeneratorProps) {
                 alt="Payment QR Code"
                 className={`mx-auto border-4 rounded-lg ${
                   isExpired || paymentDetails?.isExpired || paymentDetails?.isCompleted
-                    ? 'border-gray-300 opacity-40'
-                    : 'border-primary-100'
+                    ? 'border-gray-300 dark:border-gray-600 opacity-40'
+                    : 'border-primary-100 dark:border-primary-900'
                 }`}
                 style={{ width: '200px', height: '200px' }}
               />
@@ -189,14 +189,14 @@ export function QRGenerator({ merchantAddress }: QRGeneratorProps) {
               <div className="flex gap-2 justify-center">
                 <button
                   onClick={handleDownload}
-                  className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors"
+                  className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg transition-colors"
                 >
                   <Download className="h-4 w-4" />
                   Download
                 </button>
                 <button
                   onClick={handleCopyUrl}
-                  className="flex items-center gap-2 bg-primary-100 hover:bg-primary-200 text-primary-700 px-4 py-2 rounded-lg transition-colors"
+                  className="flex items-center gap-2 bg-primary-100 dark:bg-primary-900 hover:bg-primary-200 dark:hover:bg-primary-800 text-primary-700 dark:text-primary-300 px-4 py-2 rounded-lg transition-colors"
                 >
                   {copied ? (
                     <>
@@ -214,14 +214,14 @@ export function QRGenerator({ merchantAddress }: QRGeneratorProps) {
             ) : (
               <button
                 onClick={handleRegenerateQR}
-                className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors mx-auto"
+                className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 dark:bg-orange-500 dark:hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors mx-auto"
               >
                 <RefreshCw className="h-5 w-5" />
                 Generate New QR Code
               </button>
             )}
             {qrData.paymentUrl && !isExpired && !paymentDetails?.isExpired && (
-              <p className="mt-4 text-xs text-gray-500 break-all">
+              <p className="mt-4 text-xs text-gray-500 dark:text-gray-400 break-all">
                 {qrData.paymentUrl}
               </p>
             )}

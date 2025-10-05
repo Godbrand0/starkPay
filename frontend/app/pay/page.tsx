@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { useAppSelector } from '@/store/hooks';
 import { WalletConnect } from '@/components/WalletConnect';
 import { getPaymentDetails, verifyTransaction } from '@/lib/api';
@@ -10,6 +11,11 @@ import { getConnectedWallet } from '@/lib/wallet';
 import { openAnyWallet, isMobileDevice } from '@/lib/walletDeepLink';
 import { QrCode, CheckCircle, XCircle, Loader, ArrowLeft, Wallet } from 'lucide-react';
 import Link from 'next/link';
+
+const ThemeToggle = dynamic(() => import('@/components/ThemeToggle').then(mod => ({ default: mod.ThemeToggle })), {
+  ssr: false,
+  loading: () => <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 w-9 h-9" />
+});
 
 function PaymentContent() {
   const router = useRouter();
@@ -151,10 +157,10 @@ function PaymentContent() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading payment details...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 dark:border-primary-400 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading payment details...</p>
         </div>
       </div>
     );
@@ -162,14 +168,14 @@ function PaymentContent() {
 
   if (!merchantAddress || !tokenAddress || !amount) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="bg-white rounded-xl shadow-xl p-8 max-w-md text-center">
-          <XCircle className="h-16 w-16 text-red-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Invalid Payment Link</h2>
-          <p className="text-gray-600 mb-6">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-8 max-w-md text-center">
+          <XCircle className="h-16 w-16 text-red-600 dark:text-red-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Invalid Payment Link</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
             This payment link is invalid or incomplete. Please check the QR code or link.
           </p>
-          <Link href="/" className="text-primary-600 hover:text-primary-700 font-semibold">
+          <Link href="/" className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-500 font-semibold">
             Go to Home
           </Link>
         </div>
@@ -180,21 +186,21 @@ function PaymentContent() {
   // Check if QR code has expired or been used
   if (paymentDetails && (paymentDetails.isExpired || paymentDetails.isCompleted)) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="bg-white rounded-xl shadow-xl p-8 max-w-md text-center">
-          <XCircle className="h-16 w-16 text-orange-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-8 max-w-md text-center">
+          <XCircle className="h-16 w-16 text-orange-600 dark:text-orange-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
             {paymentDetails.isCompleted ? 'QR Code Already Used' : 'QR Code Expired'}
           </h2>
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
             {paymentDetails.isCompleted
               ? 'This QR code has already been used for a payment and cannot be reused.'
               : 'This QR code has expired. QR codes are valid for 5 minutes after generation.'}
           </p>
-          <p className="text-sm text-gray-500 mb-6">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
             Please contact the merchant to generate a new payment QR code.
           </p>
-          <Link href="/" className="text-primary-600 hover:text-primary-700 font-semibold">
+          <Link href="/" className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-500 font-semibold">
             Go to Home
           </Link>
         </div>
@@ -204,11 +210,11 @@ function PaymentContent() {
 
   if (paymentStatus === 'success') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="bg-white rounded-xl shadow-xl p-8 max-w-md text-center">
-          <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Payment Successful!</h2>
-          <p className="text-gray-600 mb-4">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-8 max-w-md text-center">
+          <CheckCircle className="h-16 w-16 text-green-600 dark:text-green-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Payment Successful!</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
             Your payment of {amount} {getTokenSymbol(tokenAddress)} has been processed.
           </p>
           {txHash && (
@@ -216,7 +222,7 @@ function PaymentContent() {
               href={`https://sepolia.starkscan.co/tx/${txHash}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary-600 hover:text-primary-700 text-sm break-all"
+              className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-500 text-sm break-all"
             >
               View transaction
             </a>
@@ -224,7 +230,7 @@ function PaymentContent() {
           <div className="mt-6">
             <Link
               href="/"
-              className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg inline-block font-semibold transition-colors"
+              className="bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white px-6 py-3 rounded-lg inline-block font-semibold transition-colors"
             >
               Back to Home
             </Link>
@@ -235,67 +241,70 @@ function PaymentContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <nav className="bg-white shadow-sm">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+      <nav className="bg-white dark:bg-gray-800 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center">
               <Link href="/" className="flex items-center">
-                <QrCode className="h-8 w-8 text-primary-600" />
-                <span className="ml-2 text-xl font-bold text-gray-900">StarkPay</span>
+                <QrCode className="h-8 w-8 text-primary-600 dark:text-primary-400" />
+                <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">StarkPay</span>
               </Link>
             </div>
-            <WalletConnect />
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+              <WalletConnect />
+            </div>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-white rounded-xl shadow-xl p-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center">Payment Details</h1>
+      <main className="max-w-md mx-auto px-4 flex flex-col justify-center items-center sm:px-6 lg:px-8 py-12">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-8">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">Payment Details</h1>
 
           {error && (
-            <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <div className="mb-6 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg">
               {error}
             </div>
           )}
 
           <div className="space-y-4 mb-6">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-500 mb-1">Merchant</p>
-              <p className="font-semibold text-gray-900">
+            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Merchant</p>
+              <p className="font-semibold text-gray-900 dark:text-white">
                 {paymentDetails?.merchantName || 'Merchant'}
               </p>
-              <p className="text-xs font-mono text-gray-600 mt-1">
+              <p className="text-xs font-mono text-gray-600 dark:text-gray-400 mt-1">
                 {merchantAddress.slice(0, 10)}...{merchantAddress.slice(-8)}
               </p>
             </div>
 
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-500 mb-1">Amount</p>
-              <p className="text-3xl font-bold text-gray-900">
+            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Amount</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white">
                 {amount} <span className="text-lg">{getTokenSymbol(tokenAddress)}</span>
               </p>
-              <p className="text-xs text-gray-600 mt-1">
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                 Platform fee (2%): {(parseFloat(amount) * 0.02).toFixed(6)} {getTokenSymbol(tokenAddress)}
               </p>
             </div>
 
             {paymentDetails?.description && (
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-500 mb-1">Description</p>
-                <p className="text-gray-900">{paymentDetails.description}</p>
+              <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Description</p>
+                <p className="text-gray-900 dark:text-white">{paymentDetails.description}</p>
               </div>
             )}
 
             {isConnected && (
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <p className="text-sm text-blue-700 mb-1">Your Balance</p>
-                <p className="font-semibold text-blue-900">
+              <div className="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
+                <p className="text-sm text-blue-700 dark:text-blue-300 mb-1">Your Balance</p>
+                <p className="font-semibold text-blue-900 dark:text-blue-200">
                   {balance} {getTokenSymbol(tokenAddress)}
                 </p>
                 {parseFloat(balance) < parseFloat(amount) && (
-                  <p className="text-xs text-red-600 mt-2">
+                  <p className="text-xs text-red-600 dark:text-red-400 mt-2">
                     ⚠️ Insufficient balance. You need {(parseFloat(amount) - parseFloat(balance)).toFixed(6)} more {getTokenSymbol(tokenAddress)}
                   </p>
                 )}
@@ -305,18 +314,18 @@ function PaymentContent() {
 
           {!isConnected ? (
             <div className="text-center space-y-3">
-              <p className="text-gray-600 mb-4">Connect your wallet to proceed with payment</p>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">Connect your wallet to proceed with payment</p>
               <WalletConnect />
               {isMobileDevice() && (
                 <>
                   <button
                     onClick={() => openAnyWallet({ returnUrl: window.location.href })}
-                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 shadow-md"
+                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 dark:from-orange-600 dark:to-orange-700 dark:hover:from-orange-700 dark:hover:to-orange-800 text-white py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 shadow-md"
                   >
-                    <Wallet className="h-5 w-5" />
+                    <Wallet className="h-5 w-full" />
                     Open Wallet App
                   </button>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     Tap "Open Wallet App" to launch your Starknet wallet (ArgentX or Braavos)
                   </p>
                 </>
@@ -326,11 +335,11 @@ function PaymentContent() {
             <button
               onClick={handlePayment}
               disabled={isProcessing}
-              className="w-full bg-primary-600 hover:bg-primary-700 text-white py-4 rounded-lg font-semibold text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white py-4 rounded-lg font-semibold text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isProcessing ? (
                 <>
-                  <Loader className="h-5 w-5 animate-spin" />
+                  <Loader className="h-5 w-full animate-spin" />
                   {paymentStatus === 'approving' && 'Approving token...'}
                   {paymentStatus === 'paying' && 'Processing payment...'}
                 </>
@@ -342,7 +351,7 @@ function PaymentContent() {
 
           <Link
             href="/"
-            className="mt-4 flex items-center justify-center text-primary-600 hover:text-primary-700"
+            className="mt-4 flex items-center justify-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-500"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Cancel
@@ -356,8 +365,8 @@ function PaymentContent() {
 export default function PayPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 dark:border-primary-400"></div>
       </div>
     }>
       <PaymentContent />
