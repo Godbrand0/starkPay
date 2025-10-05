@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { usePayments } from '@/contexts/PaymentsContext';
 import { formatTokenAmount } from '@/lib/contract';
+import { CountdownTimer } from './CountdownTimer';
 import { History, ExternalLink, Copy, Check, Clock, CheckCircle, Loader, QrCode, X } from 'lucide-react';
 
 export function TransactionList() {
@@ -67,6 +68,18 @@ export function TransactionList() {
             </div>
 
             <div className="text-center">
+              {/* Countdown Timer */}
+              {selectedQR.expiresAt && selectedQR.status === 'pending' && (
+                <div className="mb-4 flex justify-center">
+                  <CountdownTimer
+                    expiresAt={new Date(selectedQR.expiresAt)}
+                    onExpire={() => {
+                      setSelectedQR({ ...selectedQR, status: 'expired' });
+                    }}
+                  />
+                </div>
+              )}
+
               <div className="relative inline-block mb-4">
                 <img
                   src={selectedQR.qrCode}
