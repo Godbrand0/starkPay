@@ -7,7 +7,7 @@ const connectDB = require('./config/database');
 const errorHandler = require('./middleware/errorHandler');
 const merchantRoutes = require('./routes/merchant');
 const paymentRoutes = require('./routes/payment');
-const { checkPendingPayments } = require('./services/paymentVerificationService');
+const { checkPendingPayments, expireOldQRCodes } = require('./services/paymentVerificationService');
 
 const app = express();
 const PORT = process.env.PORT || 3004;

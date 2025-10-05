@@ -110,6 +110,8 @@ const verifyPendingPayment = async (payment) => {
     payment.feeAmount = feeAmount.toString();
     payment.blockNumber = receipt.block_number;
     payment.completedAt = new Date();
+    // Expire QR code immediately upon completion to prevent reuse
+    payment.expiresAt = new Date();
 
     await payment.save();
     console.log(`✅ Payment ${payment.paymentId} marked as completed`);
@@ -156,4 +158,28 @@ const checkPendingPayments = async () => {
   }
 };
 
-module.exports = { checkPendingPayments };
+// Auto-expire QR codes that are past their expiration time
+const expireOldQRCodes = async () => {
+  try {
+    const now = new Date();
+
+    // Find all pending payments that have expired
+    const expiredPayments = await Payment.updateMany(
+      {
+        status: 'pending',
+        expiresAt: { $lt: now }
+      },
+      {
+        $set: { status: 'expired' }
+      }
+    );
+
+    if (expiredPayments.modifiedCount > 0) {
+      console.log(`⏰ Expired ${expiredPayments.modifiedCount} QR code(s)`);
+    }
+  } catch (error) {
+    console.error('❌ Error expiring QR codes:', error);
+  }
+};
+
+module.exports = { checkPendingPayments, expireOldQRCodes };

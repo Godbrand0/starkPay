@@ -15,7 +15,21 @@ exports.getPaymentDetails = async (req, res) => {
       });
     }
 
+    // Check if payment has expired
+    const now = new Date();
+    const isExpired = payment.expiresAt && payment.expiresAt < now;
+    const isCompleted = payment.status === 'completed';
+
+    // Auto-expire if time has passed and not already completed
+    if (isExpired && payment.status === 'pending') {
+      payment.status = 'expired';
+      await payment.save();
+    }
+
     const merchant = await Merchant.findOne({ address: normalizeAddress(payment.merchantAddress) });
+
+    // Check if payment is still valid (not expired, not completed)
+    const isValid = payment.status === 'pending' && !isExpired;
 
     res.json({
       success: true,
@@ -25,6 +39,10 @@ exports.getPaymentDetails = async (req, res) => {
       amount: payment.amount,
       description: payment.description,
       status: payment.status,
+      expiresAt: payment.expiresAt,
+      isValid,
+      isExpired: payment.status === 'expired' || isExpired,
+      isCompleted,
     });
   } catch (error) {
     console.error('Error fetching payment details:', error);
@@ -173,6 +191,8 @@ exports.verifyTransaction = async (req, res) => {
       payment.feeAmount = feeAmount;
       payment.blockNumber = details.blockNumber;
       payment.completedAt = new Date();
+      // Expire QR code immediately upon completion to prevent reuse
+      payment.expiresAt = new Date();
     }
 
     await payment.save();

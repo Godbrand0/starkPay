@@ -177,6 +177,31 @@ function PaymentContent() {
     );
   }
 
+  // Check if QR code has expired or been used
+  if (paymentDetails && (paymentDetails.isExpired || paymentDetails.isCompleted)) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="bg-white rounded-xl shadow-xl p-8 max-w-md text-center">
+          <XCircle className="h-16 w-16 text-orange-600 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            {paymentDetails.isCompleted ? 'QR Code Already Used' : 'QR Code Expired'}
+          </h2>
+          <p className="text-gray-600 mb-6">
+            {paymentDetails.isCompleted
+              ? 'This QR code has already been used for a payment and cannot be reused.'
+              : 'This QR code has expired. QR codes are valid for 5 minutes after generation.'}
+          </p>
+          <p className="text-sm text-gray-500 mb-6">
+            Please contact the merchant to generate a new payment QR code.
+          </p>
+          <Link href="/" className="text-primary-600 hover:text-primary-700 font-semibold">
+            Go to Home
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   if (paymentStatus === 'success') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">

@@ -130,7 +130,7 @@ exports.generateQR = async (req, res) => {
       description,
       qrCode,
       paymentUrl,
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
     });
 
     await payment.save();
