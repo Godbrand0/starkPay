@@ -216,11 +216,24 @@ exports.getMerchantPayments = async (req, res) => {
 
     const normalizedAddress = normalizeAddress(address);
 
+    // Auto-expire pending payments that have passed their expiration time
+    const now = new Date();
+    await Payment.updateMany(
+      {
+        merchantAddress: normalizedAddress,
+        status: 'pending',
+        expiresAt: { $lt: now }
+      },
+      {
+        $set: { status: 'expired' }
+      }
+    );
+
     // Fetch recent payments for this merchant, ordered by most recent
     const payments = await Payment.find({ merchantAddress: normalizedAddress })
       .sort({ createdAt: -1 })
       .limit(limit)
-      .select('paymentId amount tokenAddress status description createdAt completedAt transactionHash payerAddress netAmount feeAmount');
+      .select('paymentId amount tokenAddress status description createdAt completedAt transactionHash payerAddress netAmount feeAmount expiresAt qrCode paymentUrl');
 
     console.log("Fetched payments for merchant address:", normalizedAddress);
     console.log("Total payments:", payments.length);
