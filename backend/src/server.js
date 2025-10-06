@@ -7,6 +7,7 @@ const connectDB = require('./config/database');
 const errorHandler = require('./middleware/errorHandler');
 const merchantRoutes = require('./routes/merchant');
 const paymentRoutes = require('./routes/payment');
+const priceRoutes = require('./routes/price');
 const { checkPendingPayments, expireOldQRCodes } = require('./services/paymentVerificationService');
 
 const app = express();
@@ -55,6 +56,7 @@ console.log("i'm using the frontend url, ",process.env.CORS_ORIGIN)
 app.use('/api/merchant', merchantRoutes);
 console.log("i'm using the frontend url, ",process.env.CORS_ORIGIN)
 app.use('/api/payment', paymentRoutes);
+app.use('/api/price', priceRoutes);
 console.log("i'm using the frontend url, ",process.env.CORS_ORIGIN)
 
 

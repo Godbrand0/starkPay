@@ -54,6 +54,29 @@ export const verifyTransaction = async (transactionHash: string) => {
   return response.data;
 };
 
+// Price API
+export const getPriceRates = async () => {
+  const response = await api.get('/price/rates');
+  return response.data;
+};
+
+export const convertCurrency = async (amount: number, fromCurrency: string, toCurrency: string) => {
+  const response = await api.post('/price/convert', {
+    amount,
+    fromCurrency,
+    toCurrency,
+  });
+  return response.data;
+};
+
+export const getAllConversions = async (amount: number, fromCurrency: string) => {
+  const response = await api.post('/price/convert-all', {
+    amount,
+    fromCurrency,
+  });
+  return response.data;
+};
+
 export const getMerchantPayments = async (address: string, limit: number = 10) => {
   const response = await api.get(`/merchant/${address}/payments`, {
     params: { limit },

@@ -1,29 +1,24 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { generateQRCode, getPaymentDetails, getAllConversions } from '@/lib/api';
+import { generateQRCode, getPaymentDetails } from '@/lib/api';
 import { TOKENS } from '@/lib/contract';
-import { QrCode, Download, Copy, Check, RefreshCw, ChevronDown } from 'lucide-react';
+import { QrCode, Download, Copy, Check, RefreshCw } from 'lucide-react';
 import { CountdownTimer } from './CountdownTimer';
 
 interface QRGeneratorProps {
   merchantAddress: string;
 }
 
-type Currency = 'STRK' | 'USD' | 'NGN';
-
 export function QRGenerator({ merchantAddress }: QRGeneratorProps) {
   const [tokenAddress, setTokenAddress] = useState(TOKENS.STRK.address);
-  const [selectedCurrency, setSelectedCurrency] = useState<Currency>('USD');
   const [amount, setAmount] = useState('');
-  const [conversions, setConversions] = useState<any>(null);
   const [description, setDescription] = useState('');
   const [qrData, setQrData] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [paymentDetails, setPaymentDetails] = useState<any>(null);
   const [isExpired, setIsExpired] = useState(false);
-  const [isLoadingConversions, setIsLoadingConversions] = useState(false);
 
   // Fetch payment details when QR is generated
   useEffect(() => {
@@ -44,29 +39,6 @@ export function QRGenerator({ merchantAddress }: QRGeneratorProps) {
     }
   }, [qrData?.paymentId]);
 
-  // Fetch conversions when amount changes
-  useEffect(() => {
-    const fetchConversions = async () => {
-      if (!amount || parseFloat(amount) <= 0) {
-        setConversions(null);
-        return;
-      }
-
-      setIsLoadingConversions(true);
-      try {
-        const result = await getAllConversions(parseFloat(amount), selectedCurrency);
-        setConversions(result);
-      } catch (error) {
-        console.error('Failed to fetch conversions:', error);
-      } finally {
-        setIsLoadingConversions(false);
-      }
-    };
-
-    const timer = setTimeout(fetchConversions, 500); // Debounce
-    return () => clearTimeout(timer);
-  }, [amount, selectedCurrency]);
-
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -75,21 +47,13 @@ export function QRGenerator({ merchantAddress }: QRGeneratorProps) {
       return;
     }
 
-    if (!conversions) {
-      alert('Please wait for price conversion to load');
-      return;
-    }
-
     setIsGenerating(true);
     setIsExpired(false);
     try {
-      // Get STRK amount from conversions
-      const strkAmount = conversions.conversions.STRK || parseFloat(amount);
-
       const data = await generateQRCode(merchantAddress, {
         tokenAddress,
-        amount: strkAmount.toString(),
-        description: description || `${amount} ${selectedCurrency}`,
+        amount,
+        description,
       });
       setQrData(data);
     } catch (error) {
@@ -127,27 +91,6 @@ export function QRGenerator({ merchantAddress }: QRGeneratorProps) {
     }
   };
 
-  const formatCurrency = (value: number, currency: Currency) => {
-    if (currency === 'STRK') {
-      return value.toFixed(6);
-    } else if (currency === 'USD') {
-      return value.toFixed(2);
-    } else {
-      return value.toFixed(2);
-    }
-  };
-
-  const getCurrencySymbol = (currency: Currency) => {
-    switch (currency) {
-      case 'USD':
-        return '$';
-      case 'NGN':
-        return '₦';
-      case 'STRK':
-        return '';
-    }
-  };
-
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
       <div className="flex items-center mb-6">
@@ -171,62 +114,18 @@ export function QRGenerator({ merchantAddress }: QRGeneratorProps) {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Currency
+            Amount
           </label>
-          <select
-            value={selectedCurrency}
-            onChange={(e) => setSelectedCurrency(e.target.value as Currency)}
+          <input
+            type="number"
+            step="0.000001"
+            min="0"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="0.00"
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          >
-            <option value="USD">USD - US Dollar</option>
-            <option value="NGN">NGN - Nigerian Naira</option>
-            <option value="STRK">STRK - Starknet Token</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Amount ({selectedCurrency})
-          </label>
-          <div className="relative">
-            <span className="absolute left-3 top-2 text-gray-500 dark:text-gray-400">
-              {getCurrencySymbol(selectedCurrency)}
-            </span>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="0.00"
-              className={`w-full ${getCurrencySymbol(selectedCurrency) ? 'pl-8' : 'pl-4'} pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
-              required
-            />
-          </div>
-
-          {/* Conversion Display */}
-          {conversions && amount && (
-            <div className="mt-2 space-y-1">
-              {selectedCurrency !== 'STRK' && (
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  ≈ {formatCurrency(conversions.conversions.STRK, 'STRK')} STRK
-                </p>
-              )}
-              {selectedCurrency !== 'USD' && (
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  ≈ ${formatCurrency(conversions.conversions.USD, 'USD')} USD
-                </p>
-              )}
-              {selectedCurrency !== 'NGN' && (
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  ≈ ₦{formatCurrency(conversions.conversions.NGN, 'NGN')} NGN
-                </p>
-              )}
-            </div>
-          )}
-          {isLoadingConversions && amount && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Loading exchange rates...</p>
-          )}
+            required
+          />
         </div>
 
         <div>
@@ -244,7 +143,7 @@ export function QRGenerator({ merchantAddress }: QRGeneratorProps) {
 
         <button
           type="submit"
-          disabled={isGenerating || isLoadingConversions}
+          disabled={isGenerating}
           className="w-full bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isGenerating ? 'Generating...' : 'Generate QR Code'}
