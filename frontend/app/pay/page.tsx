@@ -36,6 +36,17 @@ function PaymentContent() {
   const amount = searchParams.get('a');
   const paymentId = searchParams.get('id');
 
+  // Debug: Log URL parameters
+  useEffect(() => {
+    console.log('Payment URL Parameters:', {
+      merchantAddress,
+      tokenAddress,
+      amount,
+      paymentId,
+      fullURL: window.location.href,
+    });
+  }, [merchantAddress, tokenAddress, amount, paymentId]);
+
   useEffect(() => {
     const fetchPaymentDetails = async () => {
       if (!paymentId) {
@@ -168,12 +179,26 @@ function PaymentContent() {
 
   if (!merchantAddress || !tokenAddress || !amount) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-8 max-w-md text-center">
           <XCircle className="h-16 w-16 text-red-600 dark:text-red-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Invalid Payment Link</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            This payment link is invalid or incomplete. Please check the QR code or link.
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            This payment link is missing required information.
+          </p>
+          <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-6 text-left">
+            <p className="text-xs font-mono text-gray-700 dark:text-gray-300">
+              Missing parameters:
+            </p>
+            <ul className="text-xs font-mono text-red-600 dark:text-red-400 mt-2 space-y-1">
+              {!merchantAddress && <li>• Merchant address (m)</li>}
+              {!tokenAddress && <li>• Token address (t)</li>}
+              {!amount && <li>• Amount (a)</li>}
+              {!paymentId && <li>• Payment ID (id)</li>}
+            </ul>
+          </div>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+            Please scan the QR code again or request a new payment link from the merchant.
           </p>
           <Link href="/" className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-500 font-semibold">
             Go to Home
