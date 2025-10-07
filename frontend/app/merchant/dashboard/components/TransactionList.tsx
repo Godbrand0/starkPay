@@ -103,7 +103,7 @@ export function TransactionList() {
               <div className="space-y-2 mb-4 text-left">
                 <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
                   <p className="text-xs text-gray-500 dark:text-gray-400">Amount</p>
-                  <p className="font-semibold text-gray-900 dark:text-white">{selectedQR.amount} STRK</p>
+                  <p className="font-semibold text-gray-900 dark:text-white">{parseFloat(selectedQR.amount).toFixed(4)} STRK</p>
                 </div>
                 {selectedQR.description && (
                   <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
@@ -256,7 +256,7 @@ export function TransactionList() {
                 </div>
               ) : (
                 <div className="text-sm text-gray-500 dark:text-gray-400">
-                  <p>Requested: {payment.amount} STRK</p>
+                  <p>Requested: {parseFloat(payment.amount).toFixed(4)} STRK</p>
                   <p className="text-xs">Created: {new Date(payment.createdAt).toLocaleString()}</p>
                 </div>
               )}

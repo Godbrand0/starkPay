@@ -222,4 +222,79 @@ exports.verifyTransaction = async (req, res) => {
   }
 };
 
+// Get user payment history (payments made by a specific wallet address)
+exports.getUserPayments = async (req, res) => {
+  try {
+    const { address } = req.params;
+    const { page = 1, limit = 20 } = req.query;
+
+    if (!address) {
+      return res.status(400).json({
+        success: false,
+        message: 'Wallet address is required',
+      });
+    }
+
+    const normalizedUserAddress = normalizeAddress(address);
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    // Find all payments made by this user (completed transactions)
+    const payments = await Payment.find({
+      payerAddress: normalizedUserAddress,
+      status: 'completed',
+    })
+      .sort({ completedAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    // Get merchant details for each payment
+    const paymentsWithMerchants = await Promise.all(
+      payments.map(async (payment) => {
+        const merchant = await Merchant.findOne({
+          address: normalizeAddress(payment.merchantAddress)
+        });
+
+        return {
+          paymentId: payment.paymentId,
+          merchantAddress: payment.merchantAddress,
+          merchantName: merchant?.name || 'Unknown Merchant',
+          tokenAddress: payment.tokenAddress,
+          amount: payment.amount,
+          grossAmount: payment.grossAmount,
+          description: payment.description,
+          transactionHash: payment.transactionHash,
+          completedAt: payment.completedAt,
+          selectedCurrency: payment.selectedCurrency,
+          usdAmount: payment.usdAmount,
+          ngnAmount: payment.ngnAmount,
+        };
+      })
+    );
+
+    // Get total count for pagination
+    const totalCount = await Payment.countDocuments({
+      payerAddress: normalizedUserAddress,
+      status: 'completed',
+    });
+
+    res.json({
+      success: true,
+      payments: paymentsWithMerchants,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalCount,
+        totalPages: Math.ceil(totalCount / parseInt(limit)),
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching user payments:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch payment history',
+      error: error.message,
+    });
+  }
+};
+
 module.exports = exports;

@@ -8,4 +8,7 @@ router.get('/details/:paymentId', paymentController.getPaymentDetails);
 // POST /api/payment/verify
 router.post('/verify', paymentController.verifyTransaction);
 
+// GET /api/payment/user/:address - Get user payment history
+router.get('/user/:address', paymentController.getUserPayments);
+
 module.exports = router;

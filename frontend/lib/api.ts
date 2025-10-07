@@ -89,4 +89,11 @@ export const getMerchantPayments = async (address: string, limit: number = 10) =
   return response.data;
 };
 
+export const getUserPayments = async (address: string, page: number = 1, limit: number = 20) => {
+  const response = await api.get(`/payment/user/${address}`, {
+    params: { page, limit },
+  });
+  return response.data;
+};
+
 export default api;

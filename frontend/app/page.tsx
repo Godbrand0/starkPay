@@ -54,7 +54,7 @@ export default function HomePage() {
             </div>
           </Link>
 
-          <Link href="/pay" className="block group">
+          <Link href="/user" className="block group">
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-primary-500 dark:hover:border-primary-400">
               <div className="flex items-center justify-between mb-4">
                 <div className="bg-green-100 dark:bg-green-900 rounded-lg p-3">
@@ -64,7 +64,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Make Payment</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Scan a QR code or enter payment details to send crypto instantly.
+                View your payment history and make new payments by scanning QR codes.
               </p>
             </div>
           </Link>

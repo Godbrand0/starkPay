@@ -67,19 +67,7 @@ function PaymentContent() {
     fetchPaymentDetails();
   }, [paymentId]);
 
-  // Auto-trigger wallet connection on mobile when page loads
-  useEffect(() => {
-    const autoConnectWallet = () => {
-      if (isMobileDevice() && !isConnected && merchantAddress && tokenAddress && amount) {
-        // Try to open wallet app using deep links
-        openAnyWallet({ returnUrl: window.location.href });
-      }
-    };
-
-    // Delay to ensure page is loaded
-    const timer = setTimeout(autoConnectWallet, 1500);
-    return () => clearTimeout(timer);
-  }, [isConnected, merchantAddress, tokenAddress, amount]);
+  // Removed auto-popup wallet behavior - users can use "Open Wallet App" button instead
 
   useEffect(() => {
     const fetchBalance = async () => {
@@ -241,7 +229,7 @@ function PaymentContent() {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Payment Successful!</h2>
           <div className="text-gray-600 dark:text-gray-400 mb-4">
             <p className="text-lg font-semibold">
-              {amount} {getTokenSymbol(tokenAddress)}
+              {parseFloat(amount).toFixed(4)} {getTokenSymbol(tokenAddress)}
             </p>
             {paymentDetails && (paymentDetails.usdAmount || paymentDetails.ngnAmount) && (
               <div className="mt-2 text-sm space-y-1">
@@ -316,7 +304,7 @@ function PaymentContent() {
             <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Amount</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                {amount} <span className="text-lg">{getTokenSymbol(tokenAddress)}</span>
+                {parseFloat(amount).toFixed(4)} <span className="text-lg">{getTokenSymbol(tokenAddress)}</span>
               </p>
               {/* Currency conversions */}
               {paymentDetails && (paymentDetails.usdAmount || paymentDetails.ngnAmount) && (
@@ -334,7 +322,7 @@ function PaymentContent() {
                 </div>
               )}
               <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
-                Platform fee (2%): {(parseFloat(amount) * 0.02).toFixed(6)} {getTokenSymbol(tokenAddress)}
+                Platform fee (2%): {(parseFloat(amount) * 0.02).toFixed(4)} {getTokenSymbol(tokenAddress)}
               </p>
             </div>
 
@@ -353,7 +341,7 @@ function PaymentContent() {
                 </p>
                 {parseFloat(balance) < parseFloat(amount) && (
                   <p className="text-xs text-red-600 dark:text-red-400 mt-2">
-                    ⚠️ Insufficient balance. You need {(parseFloat(amount) - parseFloat(balance)).toFixed(6)} more {getTokenSymbol(tokenAddress)}
+                    ⚠️ Insufficient balance. You need {(parseFloat(amount) - parseFloat(balance)).toFixed(4)} more {getTokenSymbol(tokenAddress)}
                   </p>
                 )}
               </div>
