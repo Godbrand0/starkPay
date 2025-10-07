@@ -148,23 +148,23 @@ exports.verifyTransaction = async (req, res) => {
     // Convert to decimal for matching
     const grossAmountDecimal = (BigInt(grossAmount) / BigInt(10 ** 18)).toString();
 
-    // Find matching payment
+    // Find matching payment - include pending, processing, and expired (in case it was auto-expired)
     payment = await Payment.findOne({
       merchantAddress,
       tokenAddress,
       amount: grossAmountDecimal,
-      status: 'pending'
+      status: { $in: ['pending', 'processing', 'expired'] }
     }).sort({ createdAt: -1 });
 
     if (!payment) {
-      // Try amount variations
+      // Try amount variations with different statuses
       const variations = [grossAmountDecimal, parseFloat(grossAmountDecimal).toString()];
       for (const amt of variations) {
         payment = await Payment.findOne({
           merchantAddress,
           tokenAddress,
           amount: amt,
-          status: 'pending'
+          status: { $in: ['pending', 'processing', 'expired'] }
         }).sort({ createdAt: -1 });
         if (payment) break;
       }
@@ -196,8 +196,8 @@ exports.verifyTransaction = async (req, res) => {
       payment.feeAmount = feeAmount;
       payment.blockNumber = details.blockNumber;
       payment.completedAt = new Date();
-      // Expire QR code immediately upon completion to prevent reuse
-      payment.expiresAt = new Date();
+      // Don't modify expiresAt - keep original expiration time for reference
+      // The 'completed' status itself prevents reuse
     }
 
     await payment.save();
