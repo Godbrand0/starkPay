@@ -209,7 +209,7 @@ export function TransactionList() {
                     </>
                   ) : (
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {formatTokenAmount(BigInt(payment.amount), 18, 3)} STRK
+                      {parseFloat(payment.amount).toFixed(3)} STRK
                     </span>
                   )}
                   {/* View QR Button */}
