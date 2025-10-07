@@ -6,7 +6,8 @@ import Link from 'next/link';
 import { useAppSelector } from '@/store/hooks';
 import { WalletConnect } from '@/components/WalletConnect';
 import { getUserPayments } from '@/lib/api';
-import { QrCode, ArrowLeft, ExternalLink, ChevronLeft, ChevronRight, Wallet } from 'lucide-react';
+import { UserPaymentDetailsModal } from './components/UserPaymentDetailsModal';
+import { QrCode, ArrowLeft, ChevronLeft, ChevronRight, Wallet, Eye, History } from 'lucide-react';
 import { TOKENS } from '@/lib/contract';
 
 const ThemeToggle = dynamic(() => import('@/components/ThemeToggle').then(mod => ({ default: mod.ThemeToggle })), {
@@ -36,6 +37,7 @@ export default function UserPaymentHistory() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const limit = 20;
 
   useEffect(() => {
@@ -78,181 +80,175 @@ export default function UserPaymentHistory() {
     }
   };
 
+  const shortenHash = (hash: string) => {
+    return `${hash.slice(0, 8)}...${hash.slice(-6)}`;
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      <nav className="bg-white dark:bg-gray-800 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center">
-              <Link href="/" className="flex items-center">
-                <QrCode className="h-8 w-8 text-primary-600 dark:text-primary-400" />
-                <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">StarkPay</span>
-              </Link>
-            </div>
-            <div className="flex items-center gap-3">
-              <ThemeToggle />
-              <WalletConnect />
+    <>
+      {selectedPayment && (
+        <UserPaymentDetailsModal
+          payment={selectedPayment}
+          onClose={() => setSelectedPayment(null)}
+        />
+      )}
+
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+        <nav className="bg-white dark:bg-gray-800 shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between h-16 items-center">
+              <div className="flex items-center">
+                <Link href="/" className="flex items-center">
+                  <QrCode className="h-8 w-8 text-primary-600 dark:text-primary-400" />
+                  <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">StarkPay</span>
+                </Link>
+              </div>
+              <div className="flex items-center gap-3">
+                <ThemeToggle />
+                <WalletConnect />
+              </div>
             </div>
           </div>
-        </div>
-      </nav>
+        </nav>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-6">
-          <Link
-            href="/"
-            className="inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-500"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Home
-          </Link>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 md:p-8">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Payment History</h1>
-            {totalCount > 0 && (
-              <span className="text-sm text-gray-500 dark:text-gray-400">
-                {totalCount} {totalCount === 1 ? 'payment' : 'payments'}
-              </span>
-            )}
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="mb-6">
+            <Link
+              href="/"
+              className="inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-500"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Home
+            </Link>
           </div>
 
-          {!isConnected ? (
-            <div className="text-center py-12">
-              <Wallet className="h-16 w-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Connect Your Wallet
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Connect your wallet to view your payment history
-              </p>
-              <WalletConnect />
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 md:p-8">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <History className="h-8 w-8 text-primary-600 dark:text-primary-400" />
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Payment History</h1>
+              </div>
+              {totalCount > 0 && (
+                <span className="text-sm text-gray-500 dark:text-gray-400">
+                  {totalCount} {totalCount === 1 ? 'payment' : 'payments'}
+                </span>
+              )}
             </div>
-          ) : isLoading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 dark:border-primary-400 mx-auto mb-4"></div>
-              <p className="text-gray-600 dark:text-gray-400">Loading payment history...</p>
-            </div>
-          ) : payments.length === 0 ? (
-            <div className="text-center py-12">
-              <QrCode className="h-16 w-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                No Payments Yet
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                You haven't made any payments yet. Scan a QR code to make your first payment.
-              </p>
-            </div>
-          ) : (
-            <>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b dark:border-gray-700">
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
-                        Merchant
-                      </th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
-                        Amount
-                      </th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
-                        Date
-                      </th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
-                        Transaction
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {payments.map((payment) => (
-                      <tr
-                        key={payment.paymentId}
-                        className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
-                      >
-                        <td className="py-4 px-4">
-                          <div>
-                            <p className="font-semibold text-gray-900 dark:text-white">
+
+            {!isConnected ? (
+              <div className="text-center py-12">
+                <Wallet className="h-16 w-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  Connect Your Wallet
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                  Connect your wallet to view your payment history
+                </p>
+                <WalletConnect />
+              </div>
+            ) : isLoading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 dark:border-primary-400 mx-auto mb-4"></div>
+                <p className="text-gray-600 dark:text-gray-400">Loading payment history...</p>
+              </div>
+            ) : payments.length === 0 ? (
+              <div className="text-center py-12">
+                <QrCode className="h-16 w-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  No Payments Yet
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  You haven't made any payments yet. Scan a QR code to make your first payment.
+                </p>
+              </div>
+            ) : (
+              <>
+                {/* Linear Payment List */}
+                <div className="space-y-3">
+                  {payments.map((payment) => (
+                    <div
+                      key={payment.paymentId}
+                      className="border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/10 rounded-lg p-4 transition-all hover:shadow-md"
+                    >
+                      <div className="flex items-center justify-between">
+                        {/* Left side - Payment info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="text-lg font-bold text-gray-900 dark:text-white">
+                              {parseFloat(payment.amount).toFixed(4)} {getTokenSymbol(payment.tokenAddress)}
+                            </span>
+                            <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400">
+                              Completed
+                            </span>
+                          </div>
+
+                          <div className="space-y-1">
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white">
                               {payment.merchantName}
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">
-                              {payment.merchantAddress.slice(0, 10)}...{payment.merchantAddress.slice(-8)}
-                            </p>
+
                             {payment.description && (
-                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                              <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
                                 {payment.description}
                               </p>
                             )}
-                          </div>
-                        </td>
-                        <td className="py-4 px-4">
-                          <div>
-                            <p className="font-semibold text-gray-900 dark:text-white">
-                              {parseFloat(payment.amount).toFixed(4)} {getTokenSymbol(payment.tokenAddress)}
-                            </p>
+
+                            <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-500">
+                              <span className="font-mono">{shortenHash(payment.transactionHash)}</span>
+                              <span>{new Date(payment.completedAt).toLocaleDateString()}</span>
+                            </div>
+
                             {(payment.usdAmount || payment.ngnAmount) && (
-                              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 space-y-0.5">
-                                {payment.usdAmount && <p>≈ ${payment.usdAmount.toFixed(2)} USD</p>}
-                                {payment.ngnAmount && <p>≈ ₦{payment.ngnAmount.toFixed(2)} NGN</p>}
+                              <div className="flex gap-3 text-xs text-gray-600 dark:text-gray-400">
+                                {payment.usdAmount && <span>≈ ${payment.usdAmount.toFixed(2)} USD</span>}
+                                {payment.ngnAmount && <span>≈ ₦{payment.ngnAmount.toFixed(2)} NGN</span>}
                               </div>
                             )}
                           </div>
-                        </td>
-                        <td className="py-4 px-4">
-                          <p className="text-sm text-gray-700 dark:text-gray-300">
-                            {new Date(payment.completedAt).toLocaleDateString()}
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {new Date(payment.completedAt).toLocaleTimeString()}
-                          </p>
-                        </td>
-                        <td className="py-4 px-4">
-                          <a
-                            href={`https://sepolia.starkscan.co/tx/${payment.transactionHash}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-500 text-sm"
-                          >
-                            <span className="font-mono">
-                              {payment.transactionHash.slice(0, 8)}...
-                            </span>
-                            <ExternalLink className="h-4 w-4 ml-1" />
-                          </a>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                        </div>
 
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-6 pt-6 border-t dark:border-gray-700">
-                  <button
-                    onClick={handlePreviousPage}
-                    disabled={currentPage === 1}
-                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <ChevronLeft className="h-4 w-4 mr-1" />
-                    Previous
-                  </button>
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Page {currentPage} of {totalPages}
-                  </span>
-                  <button
-                    onClick={handleNextPage}
-                    disabled={currentPage === totalPages}
-                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    Next
-                    <ChevronRight className="h-4 w-4 ml-1" />
-                  </button>
+                        {/* Right side - View Details button */}
+                        <button
+                          onClick={() => setSelectedPayment(payment)}
+                          className="ml-4 flex items-center gap-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
+                        >
+                          <Eye className="h-4 w-4" />
+                          View Details
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              )}
-            </>
-          )}
-        </div>
-      </main>
-    </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between mt-6 pt-6 border-t dark:border-gray-700">
+                    <button
+                      onClick={handlePreviousPage}
+                      disabled={currentPage === 1}
+                      className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronLeft className="h-4 w-4 mr-1" />
+                      Previous
+                    </button>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <button
+                      onClick={handleNextPage}
+                      disabled={currentPage === totalPages}
+                      className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Next
+                      <ChevronRight className="h-4 w-4 ml-1" />
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </main>
+      </div>
+    </>
   );
 }
