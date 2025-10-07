@@ -20,6 +20,11 @@ export interface QRPaymentData {
   tokenAddress: string;
   amount: string;
   description?: string;
+  selectedCurrency?: string;
+  originalAmount?: number;
+  usdAmount?: number;
+  ngnAmount?: number;
+  exchangeRate?: number;
 }
 
 export const registerMerchantAPI = async (data: MerchantData) => {

@@ -20,6 +20,23 @@ const paymentSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  // Currency conversion fields
+  usdAmount: {
+    type: Number,
+  },
+  ngnAmount: {
+    type: Number,
+  },
+  selectedCurrency: {
+    type: String,
+    enum: ['USD', 'NGN', 'STRK'],
+  },
+  exchangeRate: {
+    type: Number, // STRK/USD rate at time of QR generation
+  },
+  rateTimestamp: {
+    type: Date,
+  },
   description: {
     type: String,
   },

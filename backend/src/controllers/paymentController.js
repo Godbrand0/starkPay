@@ -43,6 +43,11 @@ exports.getPaymentDetails = async (req, res) => {
       isValid,
       isExpired: payment.status === 'expired' || isExpired,
       isCompleted,
+      // Currency conversion information
+      selectedCurrency: payment.selectedCurrency,
+      usdAmount: payment.usdAmount,
+      ngnAmount: payment.ngnAmount,
+      exchangeRate: payment.exchangeRate,
     });
   } catch (error) {
     console.error('Error fetching payment details:', error);

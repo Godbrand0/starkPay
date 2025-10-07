@@ -239,9 +239,17 @@ function PaymentContent() {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-8 max-w-md text-center">
           <CheckCircle className="h-16 w-16 text-green-600 dark:text-green-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Payment Successful!</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            Your payment of {amount} {getTokenSymbol(tokenAddress)} has been processed.
-          </p>
+          <div className="text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-lg font-semibold">
+              {amount} {getTokenSymbol(tokenAddress)}
+            </p>
+            {paymentDetails && (paymentDetails.usdAmount || paymentDetails.ngnAmount) && (
+              <div className="mt-2 text-sm space-y-1">
+                {paymentDetails.usdAmount && <p>≈ ${paymentDetails.usdAmount.toFixed(2)} USD</p>}
+                {paymentDetails.ngnAmount && <p>≈ ₦{paymentDetails.ngnAmount.toFixed(2)} NGN</p>}
+              </div>
+            )}
+          </div>
           {txHash && (
             <a
               href={`https://sepolia.starkscan.co/tx/${txHash}`}
@@ -310,7 +318,22 @@ function PaymentContent() {
               <p className="text-3xl font-bold text-gray-900 dark:text-white">
                 {amount} <span className="text-lg">{getTokenSymbol(tokenAddress)}</span>
               </p>
-              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              {/* Currency conversions */}
+              {paymentDetails && (paymentDetails.usdAmount || paymentDetails.ngnAmount) && (
+                <div className="mt-2 space-y-1">
+                  {paymentDetails.usdAmount && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      ≈ ${paymentDetails.usdAmount.toFixed(2)} USD
+                    </p>
+                  )}
+                  {paymentDetails.ngnAmount && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      ≈ ₦{paymentDetails.ngnAmount.toFixed(2)} NGN
+                    </p>
+                  )}
+                </div>
+              )}
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
                 Platform fee (2%): {(parseFloat(amount) * 0.02).toFixed(6)} {getTokenSymbol(tokenAddress)}
               </p>
             </div>

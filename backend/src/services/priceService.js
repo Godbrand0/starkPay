@@ -1,8 +1,13 @@
 const axios = require('axios');
 
 // Pragma API Configuration
-const PRAGMA_API_KEY = process.env.PRAGMA_API_KEY || 'fVgkdq4oYA6FfN5megaTs1Iwu8YusvRH';
+const PRAGMA_API_KEY = process.env.PRAGMA_API_KEY;
 const PRAGMA_BASE_URL = 'https://api.production.pragma.build/node/v1';
+
+if (!PRAGMA_API_KEY) {
+  console.error('⚠️  PRAGMA_API_KEY is not set in environment variables');
+  console.error('⚠️  Price conversion will use fallback rates only');
+}
 
 // Cache for price data (prevent too many API calls)
 const priceCache = {

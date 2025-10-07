@@ -97,7 +97,7 @@ exports.generateQR = async (req, res) => {
     console.log('[generateQR] Full URL:', `${req.protocol}://${req.get('host')}${req.originalUrl}`);
 
     const { address } = req.params;
-    const { tokenAddress, amount, description } = req.body;
+    const { tokenAddress, amount, description, selectedCurrency, originalAmount, usdAmount, ngnAmount, exchangeRate } = req.body;
 
     if (!tokenAddress || !amount) {
       return res.status(400).json({
@@ -107,6 +107,7 @@ exports.generateQR = async (req, res) => {
     }
     console.log("Generating QR for merchant address:", address);
     console.log("Token address:", tokenAddress);
+    console.log("Currency info:", { selectedCurrency, originalAmount, usdAmount, ngnAmount, exchangeRate });
 
     // Verify merchant exists
     const merchant = await Merchant.findOne({ address: address.toLowerCase() });
@@ -121,7 +122,7 @@ exports.generateQR = async (req, res) => {
     const paymentUrl = createPaymentUrl(address, tokenAddress, amount, paymentId);
     const qrCode = await generateQRCode(paymentUrl);
 
-    // Save payment record with normalized addresses
+    // Save payment record with normalized addresses and currency information
     const payment = new Payment({
       paymentId,
       merchantAddress: normalizeAddress(address),
@@ -131,6 +132,12 @@ exports.generateQR = async (req, res) => {
       qrCode,
       paymentUrl,
       expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
+      // Currency conversion fields
+      selectedCurrency,
+      usdAmount,
+      ngnAmount,
+      exchangeRate,
+      rateTimestamp: new Date(),
     });
 
     await payment.save();

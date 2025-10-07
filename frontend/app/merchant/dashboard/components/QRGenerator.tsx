@@ -24,6 +24,7 @@ export function QRGenerator({ merchantAddress }: QRGeneratorProps) {
   const [paymentDetails, setPaymentDetails] = useState<any>(null);
   const [isExpired, setIsExpired] = useState(false);
   const [isLoadingConversions, setIsLoadingConversions] = useState(false);
+  const [conversionError, setConversionError] = useState<string | null>(null);
 
   // Fetch payment details when QR is generated
   useEffect(() => {
@@ -49,15 +50,54 @@ export function QRGenerator({ merchantAddress }: QRGeneratorProps) {
     const fetchConversions = async () => {
       if (!amount || parseFloat(amount) <= 0) {
         setConversions(null);
+        setConversionError(null);
         return;
       }
 
       setIsLoadingConversions(true);
+      setConversionError(null);
       try {
         const result = await getAllConversions(parseFloat(amount), selectedCurrency);
         setConversions(result);
-      } catch (error) {
+        setConversionError(null);
+      } catch (error: any) {
         console.error('Failed to fetch conversions:', error);
+        setConversionError('Failed to fetch exchange rates. Using approximate values.');
+        // Set fallback approximate conversions
+        const fallbackRates = {
+          STRK_USD: 0.45,
+          USD_NGN: 1550,
+        };
+        const amountNum = parseFloat(amount);
+        if (selectedCurrency === 'USD') {
+          setConversions({
+            rates: fallbackRates,
+            conversions: {
+              STRK: amountNum / fallbackRates.STRK_USD,
+              USD: amountNum,
+              NGN: amountNum * fallbackRates.USD_NGN,
+            }
+          });
+        } else if (selectedCurrency === 'NGN') {
+          const usd = amountNum / fallbackRates.USD_NGN;
+          setConversions({
+            rates: fallbackRates,
+            conversions: {
+              STRK: usd / fallbackRates.STRK_USD,
+              USD: usd,
+              NGN: amountNum,
+            }
+          });
+        } else {
+          setConversions({
+            rates: fallbackRates,
+            conversions: {
+              STRK: amountNum,
+              USD: amountNum * fallbackRates.STRK_USD,
+              NGN: amountNum * fallbackRates.STRK_USD * fallbackRates.USD_NGN,
+            }
+          });
+        }
       } finally {
         setIsLoadingConversions(false);
       }
@@ -90,6 +130,12 @@ export function QRGenerator({ merchantAddress }: QRGeneratorProps) {
         tokenAddress,
         amount: strkAmount.toString(),
         description: description || `${amount} ${selectedCurrency}`,
+        // Send currency information
+        selectedCurrency,
+        originalAmount: parseFloat(amount),
+        usdAmount: conversions.conversions.USD,
+        ngnAmount: conversions.conversions.NGN,
+        exchangeRate: conversions.rates?.STRK_USD,
       });
       setQrData(data);
     } catch (error) {
@@ -203,6 +249,15 @@ export function QRGenerator({ merchantAddress }: QRGeneratorProps) {
               required
             />
           </div>
+
+          {/* Error Display */}
+          {conversionError && (
+            <div className="mt-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-2">
+              <p className="text-xs text-orange-700 dark:text-orange-300">
+                ⚠️ {conversionError}
+              </p>
+            </div>
+          )}
 
           {/* Conversion Display */}
           {conversions && amount && (
