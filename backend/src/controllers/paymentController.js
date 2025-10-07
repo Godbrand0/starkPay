@@ -148,6 +148,11 @@ exports.verifyTransaction = async (req, res) => {
     // Convert to decimal for matching
     const grossAmountDecimal = (BigInt(grossAmount) / BigInt(10 ** 18)).toString();
 
+    console.log('🔍 Searching for existing payment:');
+    console.log('  Merchant:', merchantAddress);
+    console.log('  Token:', tokenAddress);
+    console.log('  Amount:', grossAmountDecimal);
+
     // Find matching payment - include pending, processing, and expired (in case it was auto-expired)
     payment = await Payment.findOne({
       merchantAddress,
@@ -157,21 +162,28 @@ exports.verifyTransaction = async (req, res) => {
     }).sort({ createdAt: -1 });
 
     if (!payment) {
+      console.log('❌ No exact match, trying variations...');
       // Try amount variations with different statuses
       const variations = [grossAmountDecimal, parseFloat(grossAmountDecimal).toString()];
       for (const amt of variations) {
+        console.log('  Trying:', amt);
         payment = await Payment.findOne({
           merchantAddress,
           tokenAddress,
           amount: amt,
           status: { $in: ['pending', 'processing', 'expired'] }
         }).sort({ createdAt: -1 });
-        if (payment) break;
+        if (payment) {
+          console.log('✅ Found with amount:', amt);
+          break;
+        }
       }
+    } else {
+      console.log('✅ Found exact match:', payment.paymentId);
     }
 
     if (!payment) {
-      console.log('Creating new payment from transaction');
+      console.log('⚠️  No matching payment found, creating new one');
       payment = new Payment({
         paymentId: require('crypto').randomBytes(16).toString('hex'),
         merchantAddress,
