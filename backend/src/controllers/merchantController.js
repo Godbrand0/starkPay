@@ -242,32 +242,14 @@ exports.getMerchantPayments = async (req, res) => {
       .limit(limit)
       .select('paymentId amount tokenAddress status description createdAt completedAt transactionHash payerAddress netAmount feeAmount expiresAt qrCode paymentUrl');
 
-    // Deduplicate: If there's a completed payment, remove any pending/expired with same amount and tokenAddress
-    // This handles race conditions where frontend polls before update completes
-    const completedPaymentKeys = new Set(
-      payments
-        .filter(p => p.status === 'completed')
-        .map(p => `${p.tokenAddress}_${p.amount}`)
-    );
-
-    payments = payments.filter((payment, index, self) => {
-      // Keep all completed payments
-      if (payment.status === 'completed') return true;
-
-      // For pending/expired payments, check if there's a completed payment with same details
-      const key = `${payment.tokenAddress}_${payment.amount}`;
-      if (completedPaymentKeys.has(key)) {
-        // Check if there's a completed payment within reasonable time window (10 minutes)
-        const hasRecentCompletedMatch = self.some(p =>
-          p.status === 'completed' &&
-          p.tokenAddress === payment.tokenAddress &&
-          p.amount === payment.amount &&
-          Math.abs(new Date(p.createdAt).getTime() - new Date(payment.createdAt).getTime()) < 10 * 60 * 1000
-        );
-        // If there's a recent completed match, filter out this pending/expired payment
-        return !hasRecentCompletedMatch;
+    // Deduplicate: Remove duplicate paymentIds (keep unique payments only)
+    // MongoDB queries can sometimes return duplicates during updates
+    const seenPaymentIds = new Set();
+    payments = payments.filter(payment => {
+      if (seenPaymentIds.has(payment.paymentId)) {
+        return false;
       }
-
+      seenPaymentIds.add(payment.paymentId);
       return true;
     });
 

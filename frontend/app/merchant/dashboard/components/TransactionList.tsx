@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePayments } from '@/contexts/PaymentsContext';
 import { formatTokenAmount } from '@/lib/contract';
 import { CountdownTimer } from './CountdownTimer';
@@ -10,6 +10,16 @@ export function TransactionList() {
   const { payments, isLoading } = usePayments();
   const [copiedHash, setCopiedHash] = useState<string | null>(null);
   const [selectedQR, setSelectedQR] = useState<any>(null);
+
+  // Update selectedQR when payments update (e.g., status changes from pending to completed)
+  useEffect(() => {
+    if (selectedQR) {
+      const updatedPayment = payments.find(p => p.paymentId === selectedQR.paymentId);
+      if (updatedPayment && updatedPayment.status !== selectedQR.status) {
+        setSelectedQR(updatedPayment);
+      }
+    }
+  }, [payments, selectedQR]);
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -68,13 +78,16 @@ export function TransactionList() {
             </div>
 
             <div className="text-center">
-              {/* Countdown Timer */}
-              {selectedQR.expiresAt && selectedQR.status === 'pending' && (
+              {/* Countdown Timer - Only show for pending payments */}
+              {selectedQR.expiresAt && (selectedQR.status === 'pending' || selectedQR.status === 'processing') && (
                 <div className="mb-4 flex justify-center">
                   <CountdownTimer
                     expiresAt={new Date(selectedQR.expiresAt)}
                     onExpire={() => {
-                      setSelectedQR({ ...selectedQR, status: 'expired' });
+                      // Don't mark as expired if it's been completed
+                      if (selectedQR.status !== 'completed') {
+                        setSelectedQR({ ...selectedQR, status: 'expired' });
+                      }
                     }}
                   />
                 </div>
