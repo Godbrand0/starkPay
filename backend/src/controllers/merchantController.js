@@ -237,10 +237,39 @@ exports.getMerchantPayments = async (req, res) => {
     );
 
     // Fetch recent payments for this merchant, ordered by most recent
-    const payments = await Payment.find({ merchantAddress: normalizedAddress })
+    let payments = await Payment.find({ merchantAddress: normalizedAddress })
       .sort({ createdAt: -1 })
       .limit(limit)
       .select('paymentId amount tokenAddress status description createdAt completedAt transactionHash payerAddress netAmount feeAmount expiresAt qrCode paymentUrl');
+
+    // Deduplicate: If there's a completed payment, remove any pending/expired with same amount and tokenAddress
+    // This handles race conditions where frontend polls before update completes
+    const completedPaymentKeys = new Set(
+      payments
+        .filter(p => p.status === 'completed')
+        .map(p => `${p.tokenAddress}_${p.amount}`)
+    );
+
+    payments = payments.filter((payment, index, self) => {
+      // Keep all completed payments
+      if (payment.status === 'completed') return true;
+
+      // For pending/expired payments, check if there's a completed payment with same details
+      const key = `${payment.tokenAddress}_${payment.amount}`;
+      if (completedPaymentKeys.has(key)) {
+        // Check if there's a completed payment within reasonable time window (10 minutes)
+        const hasRecentCompletedMatch = self.some(p =>
+          p.status === 'completed' &&
+          p.tokenAddress === payment.tokenAddress &&
+          p.amount === payment.amount &&
+          Math.abs(new Date(p.createdAt).getTime() - new Date(payment.createdAt).getTime()) < 10 * 60 * 1000
+        );
+        // If there's a recent completed match, filter out this pending/expired payment
+        return !hasRecentCompletedMatch;
+      }
+
+      return true;
+    });
 
     console.log("Fetched payments for merchant address:", normalizedAddress);
     console.log("Total payments:", payments.length);

@@ -229,7 +229,7 @@ function PaymentContent() {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Payment Successful!</h2>
           <div className="text-gray-600 dark:text-gray-400 mb-4">
             <p className="text-lg font-semibold">
-              {parseFloat(amount).toFixed(4)} {getTokenSymbol(tokenAddress)}
+              {parseFloat(amount).toFixed(3)} {getTokenSymbol(tokenAddress)}
             </p>
             {paymentDetails && (paymentDetails.usdAmount || paymentDetails.ngnAmount) && (
               <div className="mt-2 text-sm space-y-1">
@@ -304,7 +304,7 @@ function PaymentContent() {
             <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Amount</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                {parseFloat(amount).toFixed(4)} <span className="text-lg">{getTokenSymbol(tokenAddress)}</span>
+                {parseFloat(amount).toFixed(3)} <span className="text-lg">{getTokenSymbol(tokenAddress)}</span>
               </p>
               {/* Currency conversions */}
               {paymentDetails && (paymentDetails.usdAmount || paymentDetails.ngnAmount) && (
@@ -322,7 +322,7 @@ function PaymentContent() {
                 </div>
               )}
               <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
-                Platform fee (2%): {(parseFloat(amount) * 0.02).toFixed(4)} {getTokenSymbol(tokenAddress)}
+                Platform fee (2%): {(parseFloat(amount) * 0.02).toFixed(3)} {getTokenSymbol(tokenAddress)}
               </p>
             </div>
 
@@ -341,7 +341,7 @@ function PaymentContent() {
                 </p>
                 {parseFloat(balance) < parseFloat(amount) && (
                   <p className="text-xs text-red-600 dark:text-red-400 mt-2">
-                    ⚠️ Insufficient balance. You need {(parseFloat(amount) - parseFloat(balance)).toFixed(4)} more {getTokenSymbol(tokenAddress)}
+                    ⚠️ Insufficient balance. You need {(parseFloat(amount) - parseFloat(balance)).toFixed(3)} more {getTokenSymbol(tokenAddress)}
                   </p>
                 )}
               </div>
@@ -356,7 +356,7 @@ function PaymentContent() {
                 <>
                   <button
                     onClick={() => openAnyWallet({ returnUrl: window.location.href })}
-                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 dark:from-orange-600 dark:to-orange-700 dark:hover:from-orange-700 dark:hover:to-orange-800 text-white py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 shadow-md"
+                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 dark:from-orange-600 dark:to-orange-700 dark:hover:from-orange-700 dark:hover:to-orange-800 text-white py-3 rounded-lg font-semibold transition-colors gap-2 shadow-md"
                   >
                     <Wallet className="h-5 w-full" />
                     Open Wallet App
@@ -371,7 +371,7 @@ function PaymentContent() {
             <button
               onClick={handlePayment}
               disabled={isProcessing}
-              className="w-full bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white py-4 rounded-lg font-semibold text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white py-4 rounded-lg font-semibold text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isProcessing ? (
                 <>
