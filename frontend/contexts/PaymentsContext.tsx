@@ -17,6 +17,9 @@ export interface Payment {
   createdAt: string;
   completedAt?: string;
   blockNumber?: number;
+  expiresAt?: string;
+  qrCode?: string;
+  paymentUrl?: string;
 }
 
 interface PaymentsContextType {
