@@ -209,7 +209,7 @@ export function TransactionList() {
                     </>
                   ) : (
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {payment.amount} STRK
+                      {formatTokenAmount(BigInt(payment.amount), 18, 3)} STRK
                     </span>
                   )}
                   {/* View QR Button */}
@@ -236,13 +236,13 @@ export function TransactionList() {
                   <div>
                     <p className="text-gray-500 dark:text-gray-400">Net Amount</p>
                     <p className="font-semibold text-green-600 dark:text-green-400">
-                      {formatTokenAmount(BigInt(payment.netAmount), 18, 4)} STRK
+                      {formatTokenAmount(BigInt(payment.netAmount), 18, 3)} STRK
                     </p>
                   </div>
                   <div>
                     <p className="text-gray-500 dark:text-gray-400">Fee</p>
                     <p className="font-medium text-gray-700 dark:text-gray-300">
-                      {formatTokenAmount(BigInt(payment.feeAmount || '0'), 18, 4)} STRK
+                      {formatTokenAmount(BigInt(payment.feeAmount || '0'), 18, 3)} STRK
                     </p>
                   </div>
                   <div>

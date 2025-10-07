@@ -280,7 +280,7 @@ function PaymentContent() {
         </div>
       </nav>
 
-      <main className="max-w-md mx-auto px-4 flex flex-col justify-center items-center sm:px-6 lg:px-8 py-12">
+      <main className="max-w-full mx-auto px-4 flex flex-col justify-center items-center sm:px-6 lg:px-8 py-12">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-8">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">Payment Details</h1>
 
