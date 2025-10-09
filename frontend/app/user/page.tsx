@@ -7,7 +7,8 @@ import { useAppSelector } from '@/store/hooks';
 import { WalletConnect } from '@/components/WalletConnect';
 import { getUserPayments } from '@/lib/api';
 import { UserPaymentDetailsModal } from './components/UserPaymentDetailsModal';
-import { QrCode, ArrowLeft, ChevronLeft, ChevronRight, Wallet, Eye, History } from 'lucide-react';
+import { QRScanner } from './components/QRScanner';
+import { QrCode, ArrowLeft, ChevronLeft, ChevronRight, Wallet, Eye, History, Scan } from 'lucide-react';
 import { TOKENS } from '@/lib/contract';
 
 const ThemeToggle = dynamic(() => import('@/components/ThemeToggle').then(mod => ({ default: mod.ThemeToggle })), {
@@ -38,6 +39,7 @@ export default function UserPaymentHistory() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
+  const [showScanner, setShowScanner] = useState(false);
   const limit = 20;
 
   useEffect(() => {
@@ -84,12 +86,34 @@ export default function UserPaymentHistory() {
     return `${hash.slice(0, 8)}...${hash.slice(-6)}`;
   };
 
+  const handleQRScan = (result: string) => {
+    setShowScanner(false);
+    // Handle the scanned QR code - redirect to payment page or process payment URL
+    try {
+      const url = new URL(result);
+      // If it's a valid URL, navigate to it
+      window.location.href = result;
+    } catch {
+      // If not a valid URL, could be a payment ID or other data
+      console.log('Scanned data:', result);
+      // You can add custom logic here to handle non-URL QR codes
+      alert(`Scanned: ${result}`);
+    }
+  };
+
   return (
     <>
       {selectedPayment && (
         <UserPaymentDetailsModal
           payment={selectedPayment}
           onClose={() => setSelectedPayment(null)}
+        />
+      )}
+
+      {showScanner && (
+        <QRScanner
+          onScan={handleQRScan}
+          onClose={() => setShowScanner(false)}
         />
       )}
 
@@ -123,16 +147,27 @@ export default function UserPaymentHistory() {
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 md:p-8">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
               <div className="flex items-center gap-3">
                 <History className="h-8 w-8 text-primary-600 dark:text-primary-400" />
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Payment History</h1>
               </div>
-              {totalCount > 0 && (
-                <span className="text-sm text-gray-500 dark:text-gray-400">
-                  {totalCount} {totalCount === 1 ? 'payment' : 'payments'}
-                </span>
-              )}
+              <div className="flex items-center gap-3">
+                {totalCount > 0 && (
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    {totalCount} {totalCount === 1 ? 'payment' : 'payments'}
+                  </span>
+                )}
+                {isConnected && (
+                  <button
+                    onClick={() => setShowScanner(true)}
+                    className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white px-4 py-2 rounded-lg transition-colors font-medium shadow-md"
+                  >
+                    <Scan className="h-5 w-5" />
+                    Scan QR
+                  </button>
+                )}
+              </div>
             </div>
 
             {!isConnected ? (
@@ -157,9 +192,16 @@ export default function UserPaymentHistory() {
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                   No Payments Yet
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
                   You haven't made any payments yet. Scan a QR code to make your first payment.
                 </p>
+                <button
+                  onClick={() => setShowScanner(true)}
+                  className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white px-6 py-3 rounded-lg transition-colors font-medium shadow-md"
+                >
+                  <Scan className="h-5 w-5" />
+                  Scan QR Code
+                </button>
               </div>
             ) : (
               <>
