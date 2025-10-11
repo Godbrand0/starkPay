@@ -153,7 +153,7 @@ exports.verifyTransaction = async (req, res) => {
     console.log('  Token:', tokenAddress);
     console.log('  Amount:', grossAmountDecimal);
 
-    // Find matching payment - include pending, processing, and expired (in case it was auto-expired)
+    // Strategy 1: Try to find by exact match
     payment = await Payment.findOne({
       merchantAddress,
       tokenAddress,
@@ -161,12 +161,18 @@ exports.verifyTransaction = async (req, res) => {
       status: { $in: ['pending', 'processing', 'expired'] }
     }).sort({ createdAt: -1 });
 
+    // Strategy 2: Try amount variations
     if (!payment) {
-      console.log('❌ No exact match, trying variations...');
-      // Try amount variations with different statuses
-      const variations = [grossAmountDecimal, parseFloat(grossAmountDecimal).toString()];
+      console.log('❌ No exact match, trying amount variations...');
+      const variations = [
+        grossAmountDecimal,
+        parseFloat(grossAmountDecimal).toString(),
+        parseFloat(grossAmountDecimal).toFixed(1),
+        parseFloat(grossAmountDecimal).toFixed(2)
+      ];
+
       for (const amt of variations) {
-        console.log('  Trying:', amt);
+        console.log('  Trying amount:', amt);
         payment = await Payment.findOne({
           merchantAddress,
           tokenAddress,
@@ -174,12 +180,37 @@ exports.verifyTransaction = async (req, res) => {
           status: { $in: ['pending', 'processing', 'expired'] }
         }).sort({ createdAt: -1 });
         if (payment) {
-          console.log('✅ Found with amount:', amt);
+          console.log('✅ Found with amount variation:', amt);
           break;
         }
       }
     } else {
       console.log('✅ Found exact match:', payment.paymentId);
+    }
+
+    // Strategy 3: Find ANY pending payment from this merchant with similar amount (within 10 minutes)
+    if (!payment) {
+      console.log('❌ No amount match, searching by merchant and time window...');
+      const amountFloat = parseFloat(grossAmountDecimal);
+      const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+
+      const candidates = await Payment.find({
+        merchantAddress,
+        tokenAddress,
+        status: { $in: ['pending', 'processing', 'expired'] },
+        createdAt: { $gte: tenMinutesAgo }
+      }).sort({ createdAt: -1 });
+
+      // Find the closest amount match
+      for (const candidate of candidates) {
+        const candidateAmount = parseFloat(candidate.amount);
+        // Allow 0.1% difference to account for rounding
+        if (Math.abs(candidateAmount - amountFloat) / amountFloat < 0.001) {
+          payment = candidate;
+          console.log('✅ Found by time+amount proximity:', payment.paymentId, '(', candidate.amount, '≈', grossAmountDecimal, ')');
+          break;
+        }
+      }
     }
 
     if (!payment) {

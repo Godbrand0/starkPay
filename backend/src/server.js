@@ -9,6 +9,7 @@ const merchantRoutes = require('./routes/merchant');
 const paymentRoutes = require('./routes/payment');
 const priceRoutes = require('./routes/price');
 const { checkPendingPayments, expireOldQRCodes } = require('./services/paymentVerificationService');
+const { startCleanupService } = require('./services/cleanupService');
 
 const app = express();
 const PORT = process.env.PORT || 3004;
@@ -81,6 +82,9 @@ cron.schedule('*/30 * * * * *', async () => {
 });
 
 console.log('⏰ Payment verification cron job started (runs every 30 seconds)');
+
+// Start cleanup service for auto-expiring old pending payments
+startCleanupService();
 
 // Start server
 app.listen(PORT, () => {
