@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { WalletConnect } from '@/components/WalletConnect';
-import { QrCode, Zap, Shield, ArrowRight, Gauge, Coins, ChevronDown } from 'lucide-react';
+import { QrCode, Zap, Shield, ArrowRight, Gauge, Coins, ChevronDown, Lock, CheckCircle, Clock } from 'lucide-react';
 import { useState } from 'react';
 
 const ThemeToggle = dynamic(() => import('@/components/ThemeToggle').then(mod => ({ default: mod.ThemeToggle })), {
@@ -172,33 +172,206 @@ export default function HomePage() {
           </div>
         </div>
 
+        {/* COMING SOON - ESCROW SERVICE */}
+        <section className="mt-20 bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-xl overflow-hidden border border-indigo-100 dark:border-indigo-900">
+          <div className="relative">
+            {/* Coming Soon Badge */}
+            <div className="absolute top-6 right-6 z-10">
+              <span className="inline-flex items-center gap-2 bg-gradient-to-r px-4 py-2 rounded-full text-sm font-bold shadow-lg">
+                <Clock className="h-4 w-4" />
+                Coming Soon
+              </span>
+            </div>
+
+            <div className="p-12">
+              <div className="text-center mb-10">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br rounded-2xl mb-6 shadow-xl">
+                  <Lock className="h-10 w-10" />
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900 dark:text-white">
+                  Escrow Service
+                </h2>
+                <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                  Hold payment securely until service or product is delivered
+                </p>
+              </div>
+
+              {/* How it Works */}
+              <div className="max-w-4xl mx-auto mb-10">
+                <h3 className="text-xl font-semibold text-center mb-8 text-gray-800 dark:text-gray-200">
+                  How It Works
+                </h3>
+                <div className="grid md:grid-cols-5 gap-4">
+                  {/* Step 1 */}
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-12 h-12 bg-primary-600 dark:bg-primary-500 text-white rounded-full flex items-center justify-center font-bold mb-3 shadow-md">
+                      1
+                    </div>
+                    <div className="text-sm font-medium text-gray-900 dark:text-white mb-1">Customer Pays</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">Funds sent to escrow</div>
+                  </div>
+
+                  <div className="hidden md:flex items-center justify-center">
+                    <ArrowRight className="h-6 w-6 text-gray-400" />
+                  </div>
+
+                  {/* Step 2 */}
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-12 h-12 bg-primary-600 dark:bg-primary-500 text-white rounded-full flex items-center justify-center font-bold mb-3 shadow-md">
+                      2
+                    </div>
+                    <div className="text-sm font-medium text-gray-900 dark:text-white mb-1">Held Securely</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">In smart contract</div>
+                  </div>
+
+                  <div className="hidden md:flex items-center justify-center">
+                    <ArrowRight className="h-6 w-6 text-gray-400" />
+                  </div>
+
+                  {/* Step 3 */}
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-12 h-12 bg-primary-600 dark:bg-primary-500 text-white rounded-full flex items-center justify-center font-bold mb-3 shadow-md">
+                      3
+                    </div>
+                    <div className="text-sm font-medium text-gray-900 dark:text-white mb-1">Delivery</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">Service completed</div>
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-5 gap-4 mt-4">
+                  <div className="md:col-start-2 flex flex-col items-center text-center">
+                    <div className="w-12 h-12 bg-green-600 dark:bg-green-500 text-white rounded-full flex items-center justify-center font-bold mb-3 shadow-md">
+                      4
+                    </div>
+                    <div className="text-sm font-medium text-gray-900 dark:text-white mb-1">Approval</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">Customer confirms</div>
+                  </div>
+
+                  <div className="hidden md:flex items-center justify-center">
+                    <ArrowRight className="h-6 w-6 text-gray-400" />
+                  </div>
+
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-12 h-12 bg-green-600 dark:bg-green-500 text-white rounded-full flex items-center justify-center font-bold mb-3 shadow-md">
+                      5
+                    </div>
+                    <div className="text-sm font-medium text-gray-900 dark:text-white mb-1">Released</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">Merchant receives funds</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Features */}
+              <div className="max-w-3xl mx-auto">
+                <h3 className="text-xl font-semibold text-center mb-6 text-gray-800 dark:text-gray-200">
+                  Key Features
+                </h3>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="flex gap-4 p-4 dark:bg-white bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700">
+                    <div className="flex-shrink-0">
+                      <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold dark:text-gray-900 text-white mb-1">
+                        Dispute Resolution
+                      </h4>
+                      <p className="text-sm dark:text-gray-600 text-gray-400">
+                        Time-based auto-release ensures fairness for both parties
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700">
+                    <div className="flex-shrink-0">
+                      <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
+                        Milestone Payments
+                      </h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Release funds in stages as work progresses
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700">
+                    <div className="flex-shrink-0">
+                      <Shield className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
+                        Smart Contract Security
+                      </h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Funds locked on-chain, no intermediaries needed
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4 p-4 dark:bg-white bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700">
+                    <div className="flex-shrink-0">
+                      <Zap className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold dark:text-gray-900 text-white mb-1">
+                        Instant Release
+                      </h4>
+                      <p className="text-sm dark:text-gray-600 text-gray-400">
+                        Funds released immediately upon approval
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* FAQ SECTION */}
         <section className="mt-20 bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-12 max-w-5xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-10 text-gray-900 dark:text-white">Frequently Asked Questions</h2>
           <div className="space-y-4">
-            {faqs.map((faq, index) => (
-              <div
-                key={index}
-                className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
-              >
-                <button
-                  onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                  className="w-full flex justify-between items-center p-5 text-left bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            {faqs.map((faq, index) => {
+              // Alternate color pattern: odd indexes get inverted colors
+              const isInverted = index % 2 === 1;
+
+              return (
+                <div
+                  key={index}
+                  className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
                 >
-                  <span className="font-semibold text-gray-900 dark:text-white">{faq.question}</span>
-                  <ChevronDown
-                    className={`h-5 w-5 text-gray-500 transform transition-transform ${
-                      openIndex === index ? 'rotate-180' : ''
+                  <button
+                    onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                    className={`w-full flex justify-between items-center p-5 text-left transition-colors ${
+                      isInverted
+                        ? 'dark:bg-white bg-gray-800 dark:hover:bg-gray-100 hover:bg-gray-700'
+                        : 'bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800'
                     }`}
-                  />
-                </button>
-                {openIndex === index && (
-                  <div className="p-5 text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-                    {faq.answer}
-                  </div>
-                )}
-              </div>
-            ))}
+                  >
+                    <span className={`font-semibold ${
+                      isInverted ? 'dark:text-gray-900 text-white' : 'text-gray-900 dark:text-white'
+                    }`}>
+                      {faq.question}
+                    </span>
+                    <ChevronDown
+                      className={`h-5 w-5 transform transition-transform ${
+                        isInverted ? 'dark:text-gray-600 text-gray-400' : 'text-gray-500'
+                      } ${openIndex === index ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+                  {openIndex === index && (
+                    <div className={`p-5 border-t border-gray-200 dark:border-gray-700 ${
+                      isInverted
+                        ? 'dark:bg-white bg-gray-800 dark:text-gray-600 text-gray-400'
+                        : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+                    }`}>
+                      {faq.answer}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </section>
       </main>
