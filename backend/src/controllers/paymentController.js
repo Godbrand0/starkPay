@@ -148,10 +148,23 @@ exports.verifyTransaction = async (req, res) => {
     // Convert to decimal for matching
     const grossAmountDecimal = (BigInt(grossAmount) / BigInt(10 ** 18)).toString();
 
-    console.log('🔍 Searching for existing payment:');
+    console.log('\n🔍 ===== SEARCHING FOR EXISTING PAYMENT =====');
     console.log('  Merchant:', merchantAddress);
     console.log('  Token:', tokenAddress);
     console.log('  Amount:', grossAmountDecimal);
+
+    // Debug: Show all pending payments for this merchant
+    const allPendingForMerchant = await Payment.find({
+      merchantAddress,
+      status: { $in: ['pending', 'processing', 'expired'] }
+    }).select('paymentId amount tokenAddress status createdAt expiresAt').sort({ createdAt: -1 }).limit(5);
+
+    console.log(`\n  Found ${allPendingForMerchant.length} pending/processing/expired payments for this merchant:`);
+    allPendingForMerchant.forEach((p, i) => {
+      console.log(`    ${i+1}. ID: ${p.paymentId.slice(0, 8)}... | Amount: ${p.amount} | Status: ${p.status} | Created: ${p.createdAt.toISOString()}`);
+      console.log(`       Token: ${p.tokenAddress}`);
+    });
+    console.log('');
 
     // Strategy 1: Try to find by exact match
     payment = await Payment.findOne({
@@ -214,7 +227,20 @@ exports.verifyTransaction = async (req, res) => {
     }
 
     if (!payment) {
-      console.log('⚠️  No matching payment found, creating new one');
+      console.log('\n⚠️  ===== NO MATCHING PAYMENT FOUND =====');
+      console.log('⚠️  Creating new payment record');
+      console.log('⚠️  Search criteria were:');
+      console.log('    - Merchant:', merchantAddress);
+      console.log('    - Token:', tokenAddress);
+      console.log('    - Amount:', grossAmountDecimal);
+      console.log('    - Status: pending, processing, or expired');
+      console.log('    - Time window: Last 10 minutes');
+      console.log('⚠️  This might indicate:');
+      console.log('    1. No QR code was generated (direct payment)');
+      console.log('    2. QR code expired and was deleted');
+      console.log('    3. Amount mismatch between QR and actual payment');
+      console.log('=========================================\n');
+
       payment = new Payment({
         paymentId: require('crypto').randomBytes(16).toString('hex'),
         merchantAddress,
