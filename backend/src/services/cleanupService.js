@@ -8,10 +8,12 @@ async function autoExpirePendingPayments() {
     const now = new Date();
 
     // Find all pending/processing payments that have expired
+    // BUT don't expire if payment has a transaction hash (payment was made)
     const result = await Payment.updateMany(
       {
         status: { $in: ['pending', 'processing'] },
-        expiresAt: { $exists: true, $lte: now }
+        expiresAt: { $exists: true, $lte: now },
+        transactionHash: { $exists: false } // Only expire if no transaction was made
       },
       {
         $set: { status: 'expired' }

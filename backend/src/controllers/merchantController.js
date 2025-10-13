@@ -224,12 +224,14 @@ exports.getMerchantPayments = async (req, res) => {
     const normalizedAddress = normalizeAddress(address);
 
     // Auto-expire pending payments that have passed their expiration time
+    // BUT don't expire if payment has a transaction hash (payment was made)
     const now = new Date();
     await Payment.updateMany(
       {
         merchantAddress: normalizedAddress,
         status: 'pending',
-        expiresAt: { $lt: now }
+        expiresAt: { $lt: now },
+        transactionHash: { $exists: false } // Only expire if no transaction was made
       },
       {
         $set: { status: 'expired' }

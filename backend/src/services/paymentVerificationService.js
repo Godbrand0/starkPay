@@ -171,10 +171,12 @@ const expireOldQRCodes = async () => {
     const now = new Date();
 
     // Find all pending payments that have expired
+    // BUT don't expire if payment has a transaction hash (payment was made)
     const expiredPayments = await Payment.updateMany(
       {
         status: 'pending',
-        expiresAt: { $lt: now }
+        expiresAt: { $lt: now },
+        transactionHash: { $exists: false } // Only expire if no transaction was made
       },
       {
         $set: { status: 'expired' }
