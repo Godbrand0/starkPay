@@ -52,6 +52,12 @@ const verifyPendingPayment = async (payment) => {
   try {
     console.log(`🔍 Checking payment ${payment.paymentId}...`);
 
+    // Skip if payment is already completed
+    if (payment.status === 'completed') {
+      console.log(`✅ Payment ${payment.paymentId} already completed, skipping`);
+      return;
+    }
+
     // Get transaction receipt
     const receipt = await provider.getTransactionReceipt(payment.transactionHash);
 
@@ -135,10 +141,11 @@ const checkPendingPayments = async () => {
     console.log('🔄 Checking pending payments...');
 
     // Find all pending or processing payments with transaction hashes
+    // Explicitly exclude completed payments to prevent duplicates
     const pendingPayments = await Payment.find({
       status: { $in: ['pending', 'processing'] },
       transactionHash: { $exists: true, $ne: null }
-    });
+    }).limit(50); // Limit to prevent overwhelming the system
 
     if (pendingPayments.length === 0) {
       console.log('✨ No pending payments to verify');

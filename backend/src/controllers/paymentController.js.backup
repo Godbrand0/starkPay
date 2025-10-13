@@ -265,11 +265,7 @@ exports.verifyTransaction = async (req, res) => {
         completedAt: new Date(),
       });
     } else {
-      console.log('✅ Updating existing payment:', payment.paymentId);
-      
-      // Track if payment was already completed
-      const wasAlreadyCompleted = payment.status === 'completed';
-      
+      console.log(' Updating existing payment:', payment.paymentId);
       payment.status = 'completed';
       payment.transactionHash = transactionHash;
       payment.payerAddress = payerAddress;
@@ -277,38 +273,20 @@ exports.verifyTransaction = async (req, res) => {
       payment.netAmount = netAmount;
       payment.feeAmount = feeAmount;
       payment.blockNumber = details.blockNumber;
-      payment.completedAt = payment.completedAt || new Date();
+      payment.completedAt = new Date();
       // Don't modify expiresAt - keep original expiration time for reference
       // The 'completed' status itself prevents reuse
-      
-      await payment.save();
-      
-      // Update merchant stats only if not already completed
-      if (!wasAlreadyCompleted) {
-        const merchant = await Merchant.findOne({ address: merchantAddress });
-        if (merchant) {
-          merchant.totalEarnings = (BigInt(merchant.totalEarnings || 0) + BigInt(netAmount)).toString();
-          merchant.transactionCount = (merchant.transactionCount || 0) + 1;
-          await merchant.save();
-          console.log('✅ Updated merchant stats (existing payment)');
-        }
-      } else {
-        console.log('ℹ️ Skipping merchant stats - payment already completed');
-      }
-      
-      res.json({ success: true, payment });
-      return;
     }
 
     await payment.save();
 
-    // Update merchant stats (for new payments)
+    // Update merchant stats (merchantAddress is already normalized)
     const merchant = await Merchant.findOne({ address: merchantAddress });
     if (merchant) {
       merchant.totalEarnings = (BigInt(merchant.totalEarnings || 0) + BigInt(netAmount)).toString();
       merchant.transactionCount = (merchant.transactionCount || 0) + 1;
       await merchant.save();
-      console.log('✅ Updated merchant stats (new payment)');
+      console.log(' Updated merchant stats');
     }
 
     res.json({ success: true, payment });
